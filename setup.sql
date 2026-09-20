@@ -2,7 +2,7 @@
 -- Devhut Stores: Supabase setup
 -- Run once: Supabase dashboard > SQL Editor > New query > paste > Run.
 -- Safe to run again (uses IF NOT EXISTS, OR REPLACE and ON CONFLICT).
--- BEFORE RUNNING: replace you@example.com in section 7 with your admin email.
+-- BEFORE RUNNING: replace you@example.com in section 6 with your admin email.
 -- =====================================================================
 
 -- 1. TABLES -----------------------------------------------------------
@@ -39,16 +39,6 @@ create table if not exists public.products (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists public.currencies (
-  code text primary key check (code ~ '^[A-Z]{3}$'),
-  name text not null,
-  rate numeric(12,6) not null check (rate > 0),
-  enabled boolean not null default true,
-  sort int not null default 100,
-  -- Prices are stored in USD; USD must stay the fixed 1:1 base rate.
-  check (code <> 'USD' or rate = 1)
-);
-
 create table if not exists public.orders (
   id text primary key,
   created_at timestamptz not null default now(),
@@ -64,12 +54,52 @@ create table if not exists public.orders (
 );
 create index if not exists orders_created_at_idx on public.orders (created_at desc);
 
+-- Currencies: prices are stored once in the base currency and converted for display.
+-- rate = how many units of this currency equal 1 unit of the base currency.
+create table if not exists public.currencies (
+  code text primary key check (code ~ '^[A-Z]{3}$'),
+  name text not null,
+  symbol text not null,
+  rate numeric(18,6) not null check (rate > 0),
+  decimals int not null default 2 check (decimals between 0 and 4),
+  round_to numeric(12,2) not null default 0 check (round_to >= 0),
+  countries text[] not null default '{}',      -- ISO country codes that default to this currency
+  enabled boolean not null default true,
+  sort int not null default 100,
+  updated_at timestamptz not null default now()
+);
+
+-- One row of store-wide settings
+create table if not exists public.store_settings (
+  id int primary key default 1 check (id = 1),
+  base_currency text not null default 'USD',
+  base_country text not null default 'NG',     -- your home country: sets domestic delivery rates
+  free_shipping_threshold numeric(10,2) not null default 100,
+  standard_fee numeric(10,2) not null default 5.99,
+  express_fee numeric(10,2) not null default 14.99,
+  intl_standard_fee numeric(10,2) not null default 29.99,
+  intl_express_fee numeric(10,2) not null default 59.99,
+  updated_at timestamptz not null default now()
+);
+
+-- Orders remember which currency the shopper saw and the rate used at the time
+alter table public.orders add column if not exists currency text not null default 'USD';
+alter table public.orders add column if not exists rate numeric(18,6) not null default 1;
+
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$
 begin
   new.updated_at := now();
   return new;
 end $$;
+
+drop trigger if exists currencies_touch_updated_at on public.currencies;
+create trigger currencies_touch_updated_at before update on public.currencies
+  for each row execute function public.touch_updated_at();
+
+drop trigger if exists settings_touch_updated_at on public.store_settings;
+create trigger settings_touch_updated_at before update on public.store_settings
+  for each row execute function public.touch_updated_at();
 
 drop trigger if exists products_touch_updated_at on public.products;
 create trigger products_touch_updated_at before update on public.products
@@ -84,8 +114,9 @@ $$;
 alter table public.admins enable row level security;
 alter table public.categories enable row level security;
 alter table public.products enable row level security;
-alter table public.currencies enable row level security;
 alter table public.orders enable row level security;
+alter table public.currencies enable row level security;
+alter table public.store_settings enable row level security;
 
 drop policy if exists "admins read own row" on public.admins;
 create policy "admins read own row" on public.admins
@@ -115,19 +146,33 @@ drop policy if exists "admins manage currencies" on public.currencies;
 create policy "admins manage currencies" on public.currencies
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "anyone reads settings" on public.store_settings;
+create policy "anyone reads settings" on public.store_settings
+  for select to anon, authenticated using (true);
+
+drop policy if exists "admins manage settings" on public.store_settings;
+create policy "admins manage settings" on public.store_settings
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
 -- Shoppers can't read or write orders directly: they only use place_order() below
 drop policy if exists "admins manage orders" on public.orders;
 create policy "admins manage orders" on public.orders
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- 3. PLACE ORDER -------------------------------------------------------
--- Prices, variant costs, stock and delivery are all calculated here on the
--- server, so a shopper can't change prices in their browser.
-create or replace function public.place_order(
-  p_customer jsonb, p_items jsonb, p_delivery text, p_payment text
+-- Prices, variant costs, stock, delivery fees and the currency rate are all
+-- worked out here on the server, so nothing can be changed in the browser.
+-- Money is stored in the base currency; the order also records which currency
+-- the shopper saw and the rate used at the time.
+drop function if exists public.place_order(jsonb, jsonb, text, text);
+drop function if exists public.place_order(jsonb, jsonb, text, text, text);
+create function public.place_order(
+  p_customer jsonb, p_items jsonb, p_delivery text, p_payment text, p_currency text default null
 ) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
+  v_settings public.store_settings%rowtype;
+  v_currency public.currencies%rowtype;
   v_customer jsonb;
   v_item jsonb;
   v_product public.products%rowtype;
@@ -140,8 +185,14 @@ declare
   v_lines jsonb := '[]'::jsonb;
   v_subtotal numeric := 0;
   v_shipping numeric;
+  v_domestic boolean;
   v_id text;
 begin
+  select * into v_settings from public.store_settings where id = 1;
+  if not found then
+    raise exception 'The store is not set up yet.';
+  end if;
+
   if p_delivery is null or p_delivery not in ('standard', 'express') then
     raise exception 'Choose a valid delivery option.';
   end if;
@@ -153,15 +204,23 @@ begin
     raise exception 'Your cart is empty.';
   end if;
 
+  -- The shopper's currency, falling back to the base currency
+  select * into v_currency from public.currencies
+    where code = upper(coalesce(nullif(p_currency, ''), v_settings.base_currency)) and enabled;
+  if not found then
+    select * into v_currency from public.currencies where code = v_settings.base_currency;
+  end if;
+
   -- Keep only known customer fields, trimmed and length-limited
   v_customer := jsonb_build_object(
-    'name',    left(btrim(coalesce(p_customer->>'name', '')), 100),
-    'email',   left(btrim(coalesce(p_customer->>'email', '')), 200),
-    'phone',   left(btrim(coalesce(p_customer->>'phone', '')), 30),
-    'address', left(btrim(coalesce(p_customer->>'address', '')), 200),
-    'city',    left(btrim(coalesce(p_customer->>'city', '')), 100),
-    'region',  left(btrim(coalesce(p_customer->>'region', '')), 100),
-    'country', left(btrim(coalesce(p_customer->>'country', '')), 60)
+    'name',         left(btrim(coalesce(p_customer->>'name', '')), 100),
+    'email',        left(btrim(coalesce(p_customer->>'email', '')), 200),
+    'phone',        left(btrim(coalesce(p_customer->>'phone', '')), 30),
+    'address',      left(btrim(coalesce(p_customer->>'address', '')), 200),
+    'city',         left(btrim(coalesce(p_customer->>'city', '')), 100),
+    'region',       left(btrim(coalesce(p_customer->>'region', '')), 100),
+    'country',      left(btrim(coalesce(p_customer->>'country', '')), 60),
+    'country_code', upper(left(btrim(coalesce(p_customer->>'country_code', '')), 2))
   );
   if v_customer->>'name' = '' or v_customer->>'phone' = '' or v_customer->>'address' = ''
      or v_customer->>'city' = '' or v_customer->>'country' = ''
@@ -210,23 +269,30 @@ begin
   end loop;
 
   v_subtotal := round(v_subtotal, 2);
+  v_domestic := (v_customer->>'country_code') = upper(v_settings.base_country);
   v_shipping := case
-    when p_delivery = 'express' then 14.99
-    when v_subtotal >= 100 then 0
-    else 5.99 end;
+    when p_delivery = 'express' then
+      case when v_domestic then v_settings.express_fee else v_settings.intl_express_fee end
+    when v_domestic and v_subtotal >= v_settings.free_shipping_threshold then 0
+    when v_domestic then v_settings.standard_fee
+    else v_settings.intl_standard_fee end;
   v_id := 'DH-' || upper(substr(md5(random()::text || clock_timestamp()::text), 1, 8));
 
-  insert into public.orders (id, customer, items, delivery, payment, subtotal, shipping, total)
-  values (v_id, v_customer, v_lines, p_delivery, p_payment, v_subtotal, v_shipping, v_subtotal + v_shipping);
+  insert into public.orders (id, customer, items, delivery, payment, subtotal, shipping, total, currency, rate)
+  values (v_id, v_customer, v_lines, p_delivery, p_payment, v_subtotal, v_shipping,
+          v_subtotal + v_shipping, v_currency.code, v_currency.rate);
 
   return jsonb_build_object(
     'id', v_id, 'items', v_lines, 'subtotal', v_subtotal,
-    'shipping', v_shipping, 'total', v_subtotal + v_shipping, 'placedAt', now()
+    'shipping', v_shipping, 'total', v_subtotal + v_shipping, 'placedAt', now(),
+    'currency', jsonb_build_object(
+      'code', v_currency.code, 'symbol', v_currency.symbol, 'rate', v_currency.rate,
+      'decimals', v_currency.decimals, 'round_to', v_currency.round_to)
   );
 end $$;
 
-revoke all on function public.place_order(jsonb, jsonb, text, text) from public;
-grant execute on function public.place_order(jsonb, jsonb, text, text) to anon, authenticated;
+revoke all on function public.place_order(jsonb, jsonb, text, text, text) from public;
+grant execute on function public.place_order(jsonb, jsonb, text, text, text) to anon, authenticated;
 
 -- 4. IMAGE STORAGE -----------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -249,22 +315,23 @@ drop policy if exists "admins delete product images" on storage.objects;
 create policy "admins delete product images" on storage.objects
   for delete to authenticated using (bucket_id = 'product-images' and public.is_admin());
 
--- 5. CURRENCIES ---------------------------------------------------------
--- Manage which currencies shoppers can pick and their exchange rates from
--- the admin page. Rates convert 1 USD to that currency; update them from
--- the admin panel to keep them current — edit rate here only if you skip that.
-insert into public.currencies (code, name, rate, enabled, sort) values
-  ('USD', 'US Dollar', 1, true, 10),
-  ('GBP', 'British Pound', 0.78, true, 20),
-  ('EUR', 'Euro', 0.92, true, 30),
-  ('CAD', 'Canadian Dollar', 1.37, true, 40),
-  ('NGN', 'Nigerian Naira', 1550, true, 50),
-  ('GHS', 'Ghanaian Cedi', 15, true, 60),
-  ('KES', 'Kenyan Shilling', 129, true, 70),
-  ('ZAR', 'South African Rand', 18, true, 80)
+-- 5. SAMPLE DATA (skipped for rows that already exist) ----------------
+-- Rates are EXAMPLES: check today's rates and update them in Admin > Store.
+insert into public.currencies (code, name, symbol, rate, decimals, round_to, countries, sort) values
+  ('USD', 'US Dollar',        '$',  1,        2, 0,   array['US'], 10),
+  ('NGN', 'Nigerian Naira',   '₦',  1500,     0, 50,  array['NG'], 20),
+  ('GBP', 'Pound Sterling',   '£',  0.78,     2, 0,   array['GB'], 30),
+  ('EUR', 'Euro',             '€',  0.92,     2, 0,   array['IE','FR','DE','ES','IT','PT','NL','BE'], 40),
+  ('GHS', 'Ghanaian Cedi',    '₵',  15.5,     2, 0,   array['GH'], 50),
+  ('KES', 'Kenyan Shilling',  'KSh', 129,     0, 5,   array['KE'], 60),
+  ('ZAR', 'South African Rand', 'R', 18.2,    2, 0,   array['ZA'], 70),
+  ('CAD', 'Canadian Dollar',  'C$', 1.37,     2, 0,   array['CA'], 80)
 on conflict (code) do nothing;
 
--- 6. SAMPLE DATA (skipped for rows that already exist)
+insert into public.store_settings (id, base_currency, base_country)
+values (1, 'USD', 'NG')
+on conflict (id) do nothing;
+
 insert into public.categories (id, label, emoji, sort) values
   ('groceries', 'Groceries', '🥑', 10),
   ('electronics', 'Electronics', '🎧', 20),
@@ -348,7 +415,7 @@ insert into public.products (id, name, brand, category, price, old_price, rating
    '[]'::jsonb)
 on conflict (id) do nothing;
 
--- 7. MAKE YOURSELF ADMIN -----------------------------------------------
+-- 6. MAKE YOURSELF ADMIN -----------------------------------------------
 -- Replace the email with the one you created under Authentication > Users.
 insert into public.admins (user_id)
 select id from auth.users where lower(email) = lower('johnajiboye53@gmail.com')
