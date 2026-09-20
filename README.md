@@ -1,61 +1,35 @@
 # Devhut Stores
 
-A one-page e-commerce marketplace built with plain HTML, CSS and JavaScript: no
-frameworks and no build step. Products, orders and admin login are handled by
-Supabase; the site is hosted as static files on Vercel.
+A lightweight e-commerce storefront built with plain HTML, CSS and JavaScript —
+no frameworks, no build step. Product data, orders and admin authentication
+are powered by [Supabase](https://supabase.com), with the site hosted as
+static files on [Vercel](https://vercel.com).
 
-**Store:** product grid, search, category and price filters, sorting, product
-pages with image gallery and options, cart drawer, wishlist, checkout and order
-confirmation. Dark mode, keyboard support and mobile-first layout from 320px.
+## Features
 
-**Admin (`/admin.html`):** email and password sign-in, add / edit / delete
-products, photo upload, stock and visibility control, product options, and an
-order list with status updates.
+- Product grid with search, filters and sorting, product pages with image
+  galleries and options, cart, wishlist, checkout and order confirmation
+- Dark mode, keyboard support and a mobile-first layout
+- Admin panel (`/admin.html`) for managing products, stock and orders
 
-## Files
+## Getting Started
 
-| File | What it is |
-| --- | --- |
-| `index.html` | Storefront markup and icon sprite |
-| `styles.css` | All store styles (CSS variables, light and dark themes) |
-| `app.js` | Store logic: state, rendering, routing, cart, checkout |
-| `admin.html` | Admin page markup |
-| `admin.css` | Admin-only styles |
-| `admin.js` | Admin logic: auth, product CRUD, uploads, orders |
-| `config.js` | Your Supabase URL and anon key |
-| `setup.sql` | Database tables, security rules, order function, sample data |
+1. Create a project at [supabase.com](https://supabase.com), add an admin
+   user under **Authentication → Users**, and disable public sign-ups.
+2. Run `setup.sql` in the Supabase SQL Editor to create the required tables,
+   security rules and functions.
+3. Add your Supabase project URL and anon key to `config.js`.
+4. Serve the files locally (e.g. `python3 -m http.server 5500`) or deploy to
+   Vercel.
 
-## Setup
+## Security
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. In **Authentication > Users**, add a user with your admin email and password
-   (tick *Auto Confirm User*). In **Authentication > Sign In / Providers**,
-   switch off *Allow new users to sign up*.
-3. Open `setup.sql`, replace `you@example.com` in section 6 with that email,
-   then paste the whole file into **SQL Editor > New query** and run it.
-4. Copy the Project URL and anon public key from **Project Settings > API**
-   into `config.js`.
-5. Run locally: `python3 -m http.server 5500`, then open
-   <http://localhost:5500> and <http://localhost:5500/admin.html>.
-6. Deploy: `npx vercel --prod`.
-
-The anon key is safe to commit: it only allows what the database security rules
-permit. Never commit the `service_role` key.
-
-## How it works
-
-- The store reads products and categories directly from Supabase.
-- Checkout calls the `place_order` database function, which re-checks prices,
-  option costs and stock on the server, reduces stock and saves the order, so
-  totals can't be tampered with in the browser.
-- Row Level Security limits writes to accounts listed in the `admins` table.
-  Shoppers can read active products only and cannot read orders.
-- Cart, wishlist and theme are stored in the browser with `localStorage`.
-- All dynamic text is written with `textContent`, never `innerHTML`.
+- The anon key is safe to expose publicly; database access is governed by
+  Row Level Security policies. Never expose the `service_role` key.
+- Order totals are recalculated server-side to prevent tampering.
+- Admin access is restricted to accounts listed in the `admins` table.
 
 ## Notes
 
-- Payment is simulated. Card details are validated in the browser and never
-  sent anywhere. Add Paystack, Flutterwave or Stripe for real payments.
-- Free Supabase projects pause after 7 days of inactivity; restore them from
-  the dashboard.
+Payment is simulated for demonstration purposes. Integrate a provider such as
+Stripe, Paystack or Flutterwave for real transactions.
