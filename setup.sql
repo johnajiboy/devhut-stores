@@ -317,7 +317,7 @@ on conflict (id) do nothing;
 -- 6. MAKE YOURSELF ADMIN -----------------------------------------------
 -- Replace the email with the one you created under Authentication > Users.
 insert into public.admins (user_id)
-select id from auth.users where lower(email) = lower('you@example.com')
+select id from auth.users where lower(email) = lower('johnajiboye53@gmail.com')
 on conflict do nothing;
 
 -- Check it worked: this should return 1 row with your email.
