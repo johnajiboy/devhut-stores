@@ -284,6 +284,8 @@ legend { padding: 0; }
   cursor: pointer;
 }
 .select-sm { min-height: 38px; font-size: var(--fs-sm); border-radius: var(--radius-pill); }
+.currency-select { padding: 0 32px 0 14px; margin-right: 4px; }
+@media (max-width: 640px) { .currency-select { padding-left: 10px; font-size: 13px; } }
 
 /* Form fields */
 .field { display: flex; flex-direction: column; gap: 6px; }

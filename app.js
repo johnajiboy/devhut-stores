@@ -20,6 +20,7 @@ const STORAGE_KEYS = Object.freeze({
   cart: 'devhut:cart:v1',
   wishlist: 'devhut:wishlist:v1',
   theme: 'devhut:theme',
+  currency: 'devhut:currency',
   lastOrder: 'devhut:last-order:v1',
 });
 
@@ -33,8 +34,42 @@ const MAX_QTY_PER_LINE = 10;
 const LOAD_DELAY_MS = 500;           // simulated network delay for the skeleton state
 const DESKTOP_QUERY = window.matchMedia('(min-width: 960px)');
 
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-const formatPrice = (value) => money.format(value);
+// Currency ------------------------------------------------------------------
+// Prices are stored (and the server checks totals) in USD. Everything else is
+// a display-only conversion using the rate the admin sets for that currency.
+const BASE_CURRENCY = 'USD';
+const CURRENCY_LOCALES = {
+  USD: 'en-US', GBP: 'en-GB', EUR: 'en-IE', CAD: 'en-CA',
+  NGN: 'en-NG', GHS: 'en-GH', KES: 'en-KE', ZAR: 'en-ZA',
+};
+let CURRENCIES = [{ code: BASE_CURRENCY, name: 'US Dollar', rate: 1, enabled: true, sort: 0 }];
+let currentCurrency = BASE_CURRENCY;
+const currencyFormatters = new Map();
+
+function currentRate() {
+  return CURRENCIES.find((c) => c.code === currentCurrency)?.rate ?? 1;
+}
+
+function formatPrice(value) {
+  let formatter = currencyFormatters.get(currentCurrency);
+  if (!formatter) {
+    try {
+      formatter = new Intl.NumberFormat(CURRENCY_LOCALES[currentCurrency] ?? 'en-US', { style: 'currency', currency: currentCurrency });
+    } catch {
+      formatter = null;
+    }
+    currencyFormatters.set(currentCurrency, formatter);
+  }
+  const converted = value * currentRate();
+  return formatter ? formatter.format(converted) : `${currentCurrency} ${converted.toFixed(2)}`;
+}
+
+function setCurrencies(rows) {
+  const enabled = rows.filter((c) => c.enabled).sort((a, b) => a.sort - b.sort);
+  CURRENCIES = enabled.length ? enabled : [{ code: BASE_CURRENCY, name: 'US Dollar', rate: 1, enabled: true, sort: 0 }];
+  const stored = readStorage(STORAGE_KEYS.currency, null);
+  currentCurrency = CURRENCIES.some((c) => c.code === stored) ? stored : (CURRENCIES.some((c) => c.code === BASE_CURRENCY) ? BASE_CURRENCY : CURRENCIES[0].code);
+}
 
 // Supabase client (library loaded from CDN in index.html, keys in config.js)
 const CONFIG = window.DEVHUT_CONFIG ?? {};
@@ -87,21 +122,30 @@ function setCatalog(categories, products) {
 
 async function fetchCatalog() {
   if (!db) throw new Error('The store isn’t connected yet. Add your Supabase URL and anon key to config.js.');
-  const [categories, products] = await Promise.all([
+  const [categories, products, currencies] = await Promise.all([
     db.from('categories').select('id, label, emoji, sort').order('sort'),
     db.from('products').select('*').eq('active', true),
+    db.from('currencies').select('code, name, rate, enabled, sort'),
   ]);
   if (categories.error) throw categories.error;
   if (products.error) throw products.error;
+  if (currencies.error) throw currencies.error;
   setCatalog(categories.data, products.data.map(mapProduct));
+  setCurrencies(currencies.data);
 }
 
 const PRICE_PRESETS = [
-  { label: 'Under $25', min: null, max: 25 },
-  { label: '$25 to $100', min: 25, max: 100 },
-  { label: '$100 to $500', min: 100, max: 500 },
-  { label: 'Over $500', min: 500, max: null },
+  { min: null, max: 25 },
+  { min: 25, max: 100 },
+  { min: 100, max: 500 },
+  { min: 500, max: null },
 ];
+
+function presetLabel({ min, max }) {
+  if (min == null) return `Under ${formatPrice(max)}`;
+  if (max == null) return `Over ${formatPrice(min)}`;
+  return `${formatPrice(min)} to ${formatPrice(max)}`;
+}
 
 /* -------------------------------------------------------------------------
    3. UTILITIES
@@ -426,6 +470,7 @@ function cacheDom() {
     searchInput: $('#search-input'),
     searchClear: $('#search-clear'),
     themeToggle: $('#theme-toggle'),
+    currencySelect: $('#currency-select'),
     wishlistLink: $('#wishlist-link'),
     wishlistCount: $('#wishlist-count'),
     cartButton: $('#cart-button'),
@@ -622,7 +667,7 @@ function renderCategoryControls() {
     h('button', {
       type: 'button', class: 'chip', 'aria-pressed': 'false', dataset: { preset: String(i) },
       onClick: () => setPrice(preset.min, preset.max),
-    }, preset.label)));
+    }, presetLabel(preset))));
 
   syncFilterControls();
 }
@@ -1335,6 +1380,28 @@ function applyTheme(theme) {
   $('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#141f1b' : '#0f7b5f');
 }
 
+/** Rebuilds the currency picker options and reflects the active currency. */
+function renderCurrencySelect() {
+  dom.currencySelect.replaceChildren(...CURRENCIES.map((c) =>
+    h('option', { value: c.code }, `${c.code} — ${c.name}`)));
+  dom.currencySelect.value = currentCurrency;
+}
+
+/** Re-renders every price on screen after the shopper switches currency. */
+function refreshForCurrency() {
+  cardCache.clear();
+  renderCategoryControls();
+  renderHeroFeature();
+  renderCart();
+  const hash = location.hash || '#/';
+  let match;
+  if (hash === '#/' || hash === '#') renderGrid();
+  else if ((match = hash.match(/^#\/product\/([a-z0-9-]+)$/))) renderProductDetail(match[1]);
+  else if (hash === '#/wishlist') renderWishlistView();
+  else if (hash === '#/checkout') renderCheckoutView();
+  else if ((match = hash.match(/^#\/order\/([A-Z0-9-]+)$/))) renderConfirmation(match[1]);
+}
+
 /* -------------------------------------------------------------------------
    7. ROUTING (hash based, so it works on any static host including Vercel)
    ------------------------------------------------------------------------- */
@@ -1516,6 +1583,13 @@ function bindEvents() {
     try { localStorage.setItem(STORAGE_KEYS.theme, next); } catch { /* ignore */ }
   });
 
+  // Currency
+  dom.currencySelect.addEventListener('change', () => {
+    currentCurrency = dom.currencySelect.value;
+    writeStorage(STORAGE_KEYS.currency, currentCurrency);
+    refreshForCurrency();
+  });
+
   // Checkout form
   dom.checkoutForm.addEventListener('submit', handleCheckoutSubmit);
   dom.checkoutForm.addEventListener('change', (e) => {
@@ -1587,6 +1661,7 @@ async function loadCatalog() {
   ui.loading = false;
   Cart.load();
   Wishlist.load();
+  renderCurrencySelect();
   renderCategoryControls();
   renderHeroFeature();
   renderCart();
@@ -1603,6 +1678,7 @@ async function loadCatalog() {
 async function refreshCatalog() {
   try {
     await fetchCatalog();
+    renderCurrencySelect();
     cartLineNodes.clear();                 // prices may have changed: rebuild cart lines
     dom.cartItems.replaceChildren();
     Cart.load();

@@ -103,6 +103,7 @@
         <button type="button" role="tab" id="tab-orders" aria-controls="panel-orders" aria-selected="false" tabindex="-1">
           Orders <span class="tab-badge" id="pending-badge" hidden></span>
         </button>
+        <button type="button" role="tab" id="tab-currencies" aria-controls="panel-currencies" aria-selected="false" tabindex="-1">Currencies</button>
       </div>
 
       <!-- PRODUCTS -->
@@ -167,6 +168,28 @@
           <svg class="icon empty-icon" aria-hidden="true"><use href="#i-bag"/></svg>
           <h2>No orders yet</h2>
           <p>Orders placed in the store will appear here.</p>
+        </div>
+      </div>
+
+      <!-- CURRENCIES -->
+      <div role="tabpanel" id="panel-currencies" aria-labelledby="tab-currencies" class="tab-panel" hidden>
+        <p class="muted">
+          Choose which currencies shoppers can pick in the store and set each rate as
+          1 US dollar converted to that currency. Prices are stored in USD; disabled
+          currencies are hidden from the currency picker. Changes save immediately.
+        </p>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <caption class="visually-hidden">Currencies</caption>
+            <thead>
+              <tr>
+                <th scope="col">Currency</th>
+                <th scope="col">Rate (1 USD =)</th>
+                <th scope="col">Visible to shoppers</th>
+              </tr>
+            </thead>
+            <tbody id="currency-rows"></tbody>
+          </table>
         </div>
       </div>
     </section>

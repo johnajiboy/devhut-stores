@@ -28,6 +28,7 @@ const state = {
   categories: [],
   products: [],
   orders: [],
+  currencies: [],
   productQuery: '',
   productCategory: 'all',
   orderStatus: 'all',
@@ -147,6 +148,7 @@ function cacheDom() {
     orderList: $('#order-list'),
     ordersEmpty: $('#orders-empty'),
     orderCount: $('#order-count'),
+    currencyRows: $('#currency-rows'),
     dialog: $('#product-dialog'),
     dialogTitle: $('#dialog-title'),
     form: $('#product-form'),
@@ -192,7 +194,7 @@ async function enterApp(session) {
   dom.signedInAs.textContent = `Signed in as ${session.user.email}`;
   showView('app');
   dom.dashTitle.focus();
-  await Promise.all([loadCategories(), loadProducts(), loadOrders()]);
+  await Promise.all([loadCategories(), loadProducts(), loadOrders(), loadCurrencies()]);
 }
 
 async function handleLogin(event) {
@@ -708,6 +710,72 @@ async function updateOrderStatus(order, select) {
   const { count } = await db.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending');
   dom.pendingBadge.hidden = !count;
   dom.pendingBadge.textContent = String(count ?? 0);
+}
+
+/* 7b. CURRENCIES ---------------------------------------------------------- */
+async function loadCurrencies() {
+  const { data, error } = await db.from('currencies').select('*').order('sort');
+  if (error) { toast(friendlyError(error), { type: 'error' }); return; }
+  state.currencies = data;
+  renderCurrencies();
+}
+
+function renderCurrencies() {
+  dom.currencyRows.replaceChildren(...state.currencies.map(currencyRow));
+}
+
+function currencyRow(c) {
+  const isBase = c.code === 'USD';
+
+  const rateInput = h('input', {
+    type: 'number', class: 'stock-input', min: 0, step: 0.0001, value: c.rate, inputmode: 'decimal',
+    disabled: isBase, 'aria-label': `Rate for ${c.name}`,
+  });
+  rateInput.addEventListener('change', () => updateCurrencyRate(c, rateInput));
+
+  const enabled = h('input', { type: 'checkbox', checked: c.enabled, 'aria-label': `Show ${c.name} to shoppers` });
+  enabled.addEventListener('change', () => toggleCurrencyEnabled(c, enabled));
+
+  return h('tr', {},
+    h('td', { 'data-label': 'Currency' },
+      h('p', { class: 'product-cell-name' }, `${c.code} — ${c.name}`),
+      isBase ? h('p', { class: 'product-cell-id' }, 'Base currency: prices are stored in USD') : null),
+    h('td', { 'data-label': 'Rate' }, rateInput),
+    h('td', { 'data-label': 'Visible to shoppers' },
+      h('label', { class: 'switch' }, enabled, h('span', { class: 'switch-track', 'aria-hidden': 'true' }))));
+}
+
+async function updateCurrencyRate(currency, input) {
+  const rate = Number(input.value);
+  if (!Number.isFinite(rate) || rate <= 0) {
+    toast('Rate must be a number greater than 0.', { type: 'error' });
+    input.value = currency.rate;
+    return;
+  }
+  input.disabled = true;
+  const { error } = await db.from('currencies').update({ rate }).eq('code', currency.code);
+  input.disabled = false;
+  if (error) {
+    toast(friendlyError(error), { type: 'error' });
+    input.value = currency.rate;
+    return;
+  }
+  currency.rate = rate;
+  toast(`${currency.code} rate updated`);
+}
+
+async function toggleCurrencyEnabled(currency, checkbox) {
+  const enabled = checkbox.checked;
+  checkbox.disabled = true;
+  const { error } = await db.from('currencies').update({ enabled }).eq('code', currency.code);
+  checkbox.disabled = false;
+  if (error) {
+    checkbox.checked = !enabled;
+    toast(friendlyError(error), { type: 'error' });
+    return;
+  }
+  currency.enabled = enabled;
+  toast(enabled ? `${currency.code} is now available to shoppers` : `${currency.code} is now hidden from shoppers`);
 }
 
 /* 8. TABS + THEME -------------------------------------------------------- */

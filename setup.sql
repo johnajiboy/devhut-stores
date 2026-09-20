@@ -2,7 +2,7 @@
 -- Devhut Stores: Supabase setup
 -- Run once: Supabase dashboard > SQL Editor > New query > paste > Run.
 -- Safe to run again (uses IF NOT EXISTS, OR REPLACE and ON CONFLICT).
--- BEFORE RUNNING: replace you@example.com in section 6 with your admin email.
+-- BEFORE RUNNING: replace you@example.com in section 7 with your admin email.
 -- =====================================================================
 
 -- 1. TABLES -----------------------------------------------------------
@@ -37,6 +37,16 @@ create table if not exists public.products (
   variants jsonb not null default '[]'::jsonb check (jsonb_typeof(variants) = 'array'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
+);
+
+create table if not exists public.currencies (
+  code text primary key check (code ~ '^[A-Z]{3}$'),
+  name text not null,
+  rate numeric(12,6) not null check (rate > 0),
+  enabled boolean not null default true,
+  sort int not null default 100,
+  -- Prices are stored in USD; USD must stay the fixed 1:1 base rate.
+  check (code <> 'USD' or rate = 1)
 );
 
 create table if not exists public.orders (
@@ -74,6 +84,7 @@ $$;
 alter table public.admins enable row level security;
 alter table public.categories enable row level security;
 alter table public.products enable row level security;
+alter table public.currencies enable row level security;
 alter table public.orders enable row level security;
 
 drop policy if exists "admins read own row" on public.admins;
@@ -94,6 +105,14 @@ create policy "anyone reads active products" on public.products
 
 drop policy if exists "admins manage products" on public.products;
 create policy "admins manage products" on public.products
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists "anyone reads currencies" on public.currencies;
+create policy "anyone reads currencies" on public.currencies
+  for select to anon, authenticated using (true);
+
+drop policy if exists "admins manage currencies" on public.currencies;
+create policy "admins manage currencies" on public.currencies
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- Shoppers can't read or write orders directly: they only use place_order() below
@@ -230,7 +249,22 @@ drop policy if exists "admins delete product images" on storage.objects;
 create policy "admins delete product images" on storage.objects
   for delete to authenticated using (bucket_id = 'product-images' and public.is_admin());
 
--- 5. SAMPLE DATA (skipped for rows that already exist)
+-- 5. CURRENCIES ---------------------------------------------------------
+-- Manage which currencies shoppers can pick and their exchange rates from
+-- the admin page. Rates convert 1 USD to that currency; update them from
+-- the admin panel to keep them current — edit rate here only if you skip that.
+insert into public.currencies (code, name, rate, enabled, sort) values
+  ('USD', 'US Dollar', 1, true, 10),
+  ('GBP', 'British Pound', 0.78, true, 20),
+  ('EUR', 'Euro', 0.92, true, 30),
+  ('CAD', 'Canadian Dollar', 1.37, true, 40),
+  ('NGN', 'Nigerian Naira', 1550, true, 50),
+  ('GHS', 'Ghanaian Cedi', 15, true, 60),
+  ('KES', 'Kenyan Shilling', 129, true, 70),
+  ('ZAR', 'South African Rand', 18, true, 80)
+on conflict (code) do nothing;
+
+-- 6. SAMPLE DATA (skipped for rows that already exist)
 insert into public.categories (id, label, emoji, sort) values
   ('groceries', 'Groceries', '🥑', 10),
   ('electronics', 'Electronics', '🎧', 20),
@@ -314,7 +348,7 @@ insert into public.products (id, name, brand, category, price, old_price, rating
    '[]'::jsonb)
 on conflict (id) do nothing;
 
--- 6. MAKE YOURSELF ADMIN -----------------------------------------------
+-- 7. MAKE YOURSELF ADMIN -----------------------------------------------
 -- Replace the email with the one you created under Authentication > Users.
 insert into public.admins (user_id)
 select id from auth.users where lower(email) = lower('johnajiboye53@gmail.com')
