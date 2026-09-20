@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Devhut Stores | Groceries, electronics, home and fashion</title>
+  <meta name="description" content="Shop groceries, electronics, gadgets, household equipment and clothing at Devhut Stores. Fast delivery and easy returns.">
+  <meta name="theme-color" content="#0f7b5f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f7b5f'/%3E%3Cpath d='M14 30 32 14l18 16v20H14z' fill='%23f4b400'/%3E%3C/svg%3E">
+
+  <!-- Apply the saved theme before first paint to avoid a light/dark flash -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('devhut:theme');
+        if (t !== 'dark' && t !== 'light') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="config.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Icon sprite: referenced with <use href="#i-name"> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.6 0 5.6 3.5 4.3 6.8C19.5 15.9 12 20.5 12 20.5z"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3.5h2.8l2.2 11.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.1l1.6-7.3H6.1"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.5 3.2 8.2 7.5 9.5 4.3-1.3 7.5-5 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main" id="skip-link">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#/" class="logo" aria-label="Devhut Stores home">
+        <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14"/><path d="M14 30 32 14l18 16v20H14z"/></svg>
+        <span class="logo-text">Devhut<span>Stores</span></span>
+      </a>
+
+      <form class="search" role="search" id="search-form">
+        <label for="search-input" class="visually-hidden">Search products</label>
+        <svg class="icon search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input id="search-input" type="search" name="q" placeholder="Search products, brands and categories" autocomplete="off" maxlength="80" enterkeyhint="search">
+        <button type="button" class="search-clear" id="search-clear" aria-label="Clear search" hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </form>
+
+      <div class="header-actions">
+        <button type="button" id="theme-toggle" class="icon-btn" aria-label="Dark mode" aria-pressed="false" title="Toggle dark mode">
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+          <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+        </button>
+        <a href="#/wishlist" class="icon-btn" id="wishlist-link" aria-label="Wishlist, 0 items">
+          <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg>
+          <span class="badge" id="wishlist-count" aria-hidden="true" hidden>0</span>
+        </a>
+        <button type="button" id="cart-button" class="icon-btn cart-btn" aria-label="Open cart, 0 items" aria-controls="cart-drawer" aria-expanded="false">
+          <svg class="icon" aria-hidden="true"><use href="#i-cart"/></svg>
+          <span class="cart-btn-label">Cart</span>
+          <span class="badge" id="cart-count" aria-hidden="true" hidden>0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="category-nav" aria-label="Shop by category">
+    <div class="container">
+      <ul class="chip-row" id="category-nav-list"></ul>
+    </div>
+  </nav>
+
+  <main id="main" tabindex="-1">
+    <!-- HOME / STOREFRONT -->
+    <section class="view" data-view="home" aria-labelledby="home-title">
+      <div class="container">
+        <div class="hero">
+          <div class="hero-copy">
+            <h1 id="home-title" tabindex="-1" data-view-heading>Your weekly shop, gadgets and home upgrades in one basket.</h1>
+            <p class="hero-lead">Groceries, electronics, household equipment and clothing, delivered to your door. Free standard delivery on orders over $100.</p>
+            <div class="flash">
+              <p class="flash-label">Flash sale ends in</p>
+              <p class="flash-timer" role="timer" aria-label="Time left in today's flash sale" id="flash-timer">
+                <span data-unit="h">00</span><span class="flash-colon" aria-hidden="true">:</span><span data-unit="m">00</span><span class="flash-colon" aria-hidden="true">:</span><span data-unit="s">00</span>
+              </p>
+            </div>
+            <button type="button" class="btn btn-accent btn-lg" id="hero-shop">Shop flash deals</button>
+          </div>
+          <div class="hero-feature" id="hero-feature"></div>
+        </div>
+
+        <ul class="perks" aria-label="Why shop with us">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg><span><strong>Free delivery</strong> on orders over $100</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span><strong>Secure checkout</strong> with pay on delivery</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg><span><strong>7-day returns</strong> on most items</span></li>
+        </ul>
+
+        <div class="shop-layout" id="shop">
+          <aside class="filters" id="filters" aria-labelledby="filters-title">
+            <div class="filters-head">
+              <h2 id="filters-title">Filters</h2>
+              <button type="button" class="icon-btn filters-close" id="filters-close" aria-label="Close filters">
+                <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+              </button>
+            </div>
+
+            <fieldset class="filter-group">
+              <legend>Category</legend>
+              <div class="radio-list" id="category-filter-list"></div>
+            </fieldset>
+
+            <fieldset class="filter-group">
+              <legend>Price (USD)</legend>
+              <div class="price-inputs">
+                <div class="field">
+                  <label for="price-min">Min</label>
+                  <input type="number" id="price-min" min="0" step="1" inputmode="decimal" placeholder="0" aria-describedby="price-error">
+                </div>
+                <span class="price-sep" aria-hidden="true">to</span>
+                <div class="field">
+                  <label for="price-max">Max</label>
+                  <input type="number" id="price-max" min="0" step="1" inputmode="decimal" placeholder="Any" aria-describedby="price-error">
+                </div>
+              </div>
+              <p class="field-error" id="price-error" role="alert"></p>
+              <div class="price-presets" id="price-presets"></div>
+            </fieldset>
+
+            <div class="filters-foot">
+              <button type="button" class="btn btn-ghost btn-block" data-reset-filters>Reset filters</button>
+              <button type="button" class="btn btn-primary btn-block filters-apply" id="filters-apply">Show results</button>
+            </div>
+          </aside>
+
+          <div class="results">
+            <div class="toolbar">
+              <p class="results-count" id="results-count" aria-live="polite">Loading products…</p>
+              <div class="toolbar-actions">
+                <button type="button" class="btn btn-outline btn-sm filters-open" id="filters-open" aria-controls="filters" aria-expanded="false">
+                  <svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg> Filters
+                </button>
+                <label for="sort-select" class="visually-hidden">Sort products</label>
+                <select id="sort-select" class="select select-sm">
+                  <option value="featured">Sort: Featured</option>
+                  <option value="price-asc">Price: low to high</option>
+                  <option value="price-desc">Price: high to low</option>
+                  <option value="rating">Top rated</option>
+                  <option value="discount">Biggest discount</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="active-filters" id="active-filters"></div>
+
+            <ul class="product-grid" id="product-grid" aria-label="Products" aria-busy="true"></ul>
+
+            <div class="empty-state" id="grid-empty" hidden>
+              <svg class="icon empty-icon" aria-hidden="true"><use href="#i-search"/></svg>
+              <h2>No products match these filters</h2>
+              <p>Try a different search term, widen the price range or pick another category.</p>
+              <button type="button" class="btn btn-primary" data-reset-filters>Clear all filters</button>
+            </div>
+
+            <div class="empty-state" id="grid-error" hidden>
+              <svg class="icon empty-icon" aria-hidden="true"><use href="#i-alert"/></svg>
+              <h2>We couldn't load the products</h2>
+              <p id="grid-error-text">Check your connection and try again.</p>
+              <button type="button" class="btn btn-primary" id="grid-retry">Try again</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCT DETAIL -->
+    <section class="view" data-view="product" hidden>
+      <div class="container" id="product-detail"></div>
+    </section>
+
+    <!-- WISHLIST -->
+    <section class="view" data-view="wishlist" aria-labelledby="wishlist-title" hidden>
+      <div class="container">
+        <div class="view-head">
+          <h1 id="wishlist-title" tabindex="-1" data-view-heading>Wishlist</h1>
+          <p class="muted" id="wishlist-subtitle"></p>
+        </div>
+        <ul class="product-grid product-grid-wide" id="wishlist-grid" aria-label="Saved products"></ul>
+        <div class="empty-state" id="wishlist-empty" hidden>
+          <svg class="icon empty-icon" aria-hidden="true"><use href="#i-heart"/></svg>
+          <h2>Nothing saved yet</h2>
+          <p>Tap the heart on any product to keep it here for later.</p>
+          <a href="#/" class="btn btn-primary">Browse products</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECKOUT -->
+    <section class="view" data-view="checkout" aria-labelledby="checkout-title" hidden>
+      <div class="container">
+        <div class="view-head">
+          <h1 id="checkout-title" tabindex="-1" data-view-heading>Checkout</h1>
+        </div>
+
+        <div class="empty-state" id="checkout-empty" hidden>
+          <svg class="icon empty-icon" aria-hidden="true"><use href="#i-bag"/></svg>
+          <h2>Your cart is empty</h2>
+          <p>Add a few products before checking out.</p>
+          <a href="#/" class="btn btn-primary">Start shopping</a>
+        </div>
+
+        <div class="checkout-layout" id="checkout-content">
+          <form id="checkout-form" class="checkout-form" novalidate>
+            <fieldset class="form-section">
+              <legend>Contact details</legend>
+              <div class="form-grid">
+                <div class="field span-2">
+                  <label for="fullName">Full name</label>
+                  <input id="fullName" name="fullName" type="text" autocomplete="name" required aria-describedby="fullName-error">
+                  <p class="field-error" id="fullName-error"></p>
+                </div>
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" autocomplete="email" required aria-describedby="email-error">
+                  <p class="field-error" id="email-error"></p>
+                </div>
+                <div class="field">
+                  <label for="phone">Phone number</label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+234 801 234 5678" required aria-describedby="phone-error">
+                  <p class="field-error" id="phone-error"></p>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Delivery address</legend>
+              <div class="form-grid">
+                <div class="field span-2">
+                  <label for="address">Street address</label>
+                  <input id="address" name="address" type="text" autocomplete="street-address" required aria-describedby="address-error">
+                  <p class="field-error" id="address-error"></p>
+                </div>
+                <div class="field">
+                  <label for="city">City</label>
+                  <input id="city" name="city" type="text" autocomplete="address-level2" required aria-describedby="city-error">
+                  <p class="field-error" id="city-error"></p>
+                </div>
+                <div class="field">
+                  <label for="region">State / region</label>
+                  <input id="region" name="region" type="text" autocomplete="address-level1" required aria-describedby="region-error">
+                  <p class="field-error" id="region-error"></p>
+                </div>
+                <div class="field span-2">
+                  <label for="country">Country</label>
+                  <select id="country" name="country" class="select" autocomplete="country-name" required aria-describedby="country-error">
+                    <option value="">Select a country</option>
+                    <option>Nigeria</option>
+                    <option>Ghana</option>
+                    <option>Kenya</option>
+                    <option>South Africa</option>
+                    <option>Egypt</option>
+                    <option>Côte d'Ivoire</option>
+                    <option>Rwanda</option>
+                    <option>United Kingdom</option>
+                    <option>United States</option>
+                  </select>
+                  <p class="field-error" id="country-error"></p>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Delivery speed</legend>
+              <div class="choice-list">
+                <label class="choice">
+                  <input type="radio" name="delivery" value="standard" checked>
+                  <span class="choice-body"><strong>Standard</strong><span class="muted">3–5 business days</span></span>
+                  <span class="choice-price" id="standard-fee">$5.99</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="delivery" value="express">
+                  <span class="choice-body"><strong>Express</strong><span class="muted">1–2 business days</span></span>
+                  <span class="choice-price">$14.99</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+              <legend>Payment</legend>
+              <div class="choice-list">
+                <label class="choice">
+                  <input type="radio" name="payment" value="cod" checked>
+                  <span class="choice-body"><strong>Pay on delivery</strong><span class="muted">Cash or card when your order arrives</span></span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="payment" value="card">
+                  <span class="choice-body"><strong>Debit or credit card</strong><span class="muted">Demo only, no real charge is made</span></span>
+                </label>
+              </div>
+
+              <div class="card-fields form-grid" id="card-fields" hidden>
+                <div class="field span-2">
+                  <label for="cardName">Name on card</label>
+                  <input id="cardName" name="cardName" type="text" autocomplete="cc-name" aria-describedby="cardName-error" disabled>
+                  <p class="field-error" id="cardName-error"></p>
+                </div>
+                <div class="field span-2">
+                  <label for="cardNumber">Card number</label>
+                  <input id="cardNumber" name="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" maxlength="23" aria-describedby="cardNumber-hint cardNumber-error" disabled>
+                  <p class="field-hint" id="cardNumber-hint">Test card: 4242 4242 4242 4242</p>
+                  <p class="field-error" id="cardNumber-error"></p>
+                </div>
+                <div class="field">
+                  <label for="cardExpiry">Expiry (MM/YY)</label>
+                  <input id="cardExpiry" name="cardExpiry" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="08/28" maxlength="5" aria-describedby="cardExpiry-error" disabled>
+                  <p class="field-error" id="cardExpiry-error"></p>
+                </div>
+                <div class="field">
+                  <label for="cardCvc">Security code</label>
+                  <input id="cardCvc" name="cardCvc" type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4" aria-describedby="cardCvc-error" disabled>
+                  <p class="field-error" id="cardCvc-error"></p>
+                </div>
+              </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block" id="place-order">Place order</button>
+          </form>
+
+          <aside class="order-summary" aria-labelledby="summary-title">
+            <h2 id="summary-title">Order summary</h2>
+            <ul class="summary-items" id="summary-items"></ul>
+            <dl class="summary-totals">
+              <div><dt>Subtotal</dt><dd id="summary-subtotal">$0.00</dd></div>
+              <div><dt>Delivery</dt><dd id="summary-shipping">$0.00</dd></div>
+              <div class="summary-grand"><dt>Total</dt><dd id="summary-total">$0.00</dd></div>
+            </dl>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDER CONFIRMATION -->
+    <section class="view" data-view="confirmation" hidden>
+      <div class="container" id="confirmation"></div>
+    </section>
+
+    <!-- NOT FOUND -->
+    <section class="view" data-view="notfound" aria-labelledby="notfound-title" hidden>
+      <div class="container">
+        <div class="empty-state">
+          <svg class="icon empty-icon" aria-hidden="true"><use href="#i-alert"/></svg>
+          <h1 id="notfound-title" tabindex="-1" data-view-heading>That page doesn't exist</h1>
+          <p>The link may be broken or the product is no longer available.</p>
+          <a href="#/" class="btn btn-primary">Back to the store</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-brand">Devhut Stores</p>
+        <p class="muted">Groceries, electronics, gadgets, household equipment and clothing.</p>
+      </div>
+      <div>
+        <p class="footer-heading">Customer care</p>
+        <p class="muted">help@devhutstores.example<br>Mon to Sat, 8am to 8pm</p>
+      </div>
+      <p class="muted footer-copy">© <span id="year"></span> Devhut Stores. Demo store: no real orders are processed.</p>
+    </div>
+  </footer>
+
+  <!-- Shared overlay for the cart drawer and mobile filters -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- CART DRAWER -->
+  <aside class="drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <div class="drawer-head">
+      <h2 id="cart-title" tabindex="-1">Your cart <span id="cart-title-count"></span></h2>
+      <button type="button" class="icon-btn" id="cart-close" aria-label="Close cart">
+        <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <ul class="cart-items" id="cart-items" aria-label="Items in cart"></ul>
+      <div class="empty-state empty-state-sm" id="cart-empty">
+        <svg class="icon empty-icon" aria-hidden="true"><use href="#i-cart"/></svg>
+        <h3>Your cart is empty</h3>
+        <p>Products you add will show up here.</p>
+        <button type="button" class="btn btn-primary" data-close-cart>Start shopping</button>
+      </div>
+    </div>
+    <div class="drawer-foot" id="cart-foot">
+      <div class="shipping-meter">
+        <p id="shipping-hint"></p>
+        <div class="meter" aria-hidden="true"><span id="shipping-progress"></span></div>
+      </div>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong id="cart-subtotal">$0.00</strong>
+      </div>
+      <a href="#/checkout" class="btn btn-primary btn-lg btn-block" id="checkout-link">Go to checkout</a>
+      <button type="button" class="btn btn-ghost btn-block" data-close-cart>Continue shopping</button>
+    </div>
+  </aside>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+</body>
+</html>

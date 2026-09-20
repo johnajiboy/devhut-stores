@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin | Devhut Stores</title>
+  <meta name="theme-color" content="#0f7b5f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213d'/%3E%3Cpath d='M14 30 32 14l18 16v20H14z' fill='%23f4b400'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('devhut:theme');
+        if (t !== 'dark' && t !== 'light') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="config.js" defer></script>
+  <script src="admin.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.8-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1-4.4-4.3 6.1-.8z"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="container admin-header">
+      <a href="admin.html" class="logo" aria-label="Devhut Stores admin">
+        <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14"/><path d="M14 30 32 14l18 16v20H14z"/></svg>
+        <span class="logo-text">Devhut<span>Admin</span></span>
+      </a>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">View store</a>
+        <button type="button" id="theme-toggle" class="icon-btn" aria-label="Dark mode" aria-pressed="false" title="Toggle dark mode">
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+          <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+        </button>
+        <button type="button" id="sign-out" class="icon-btn" aria-label="Sign out" title="Sign out" hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1" class="admin-main">
+    <!-- Loading -->
+    <div class="container admin-loading" id="boot-view">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Loading…</p>
+    </div>
+
+    <!-- Sign in -->
+    <section class="container login-wrap" id="login-view" aria-labelledby="login-title" hidden>
+      <div class="login-card">
+        <h1 id="login-title">Admin sign in</h1>
+        <p class="muted">Use the admin account you created in Supabase.</p>
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input id="login-email" name="email" type="email" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+          <p class="form-alert" id="login-error" role="alert"></p>
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="login-submit">Sign in</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="container" id="app-view" aria-labelledby="dash-title" hidden>
+      <div class="view-head">
+        <h1 id="dash-title" tabindex="-1">Store admin</h1>
+        <p class="muted" id="signed-in-as"></p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Admin sections">
+        <button type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="true">Products</button>
+        <button type="button" role="tab" id="tab-orders" aria-controls="panel-orders" aria-selected="false" tabindex="-1">
+          Orders <span class="tab-badge" id="pending-badge" hidden></span>
+        </button>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div role="tabpanel" id="panel-products" aria-labelledby="tab-products" class="tab-panel">
+        <ul class="stats" id="product-stats" aria-label="Product summary"></ul>
+
+        <div class="admin-toolbar">
+          <div class="search admin-search">
+            <label for="product-search" class="visually-hidden">Search products</label>
+            <svg class="icon search-icon" aria-hidden="true"><use href="#i-search"/></svg>
+            <input id="product-search" type="search" placeholder="Search by name, brand or ID" autocomplete="off">
+          </div>
+          <label for="product-category-filter" class="visually-hidden">Filter by category</label>
+          <select id="product-category-filter" class="select select-sm"></select>
+          <button type="button" class="btn btn-primary btn-sm" id="add-product">
+            <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Add product
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="admin-table">
+            <caption class="visually-hidden">Products</caption>
+            <thead>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col">Category</th>
+                <th scope="col">Price</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Visible</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="product-rows"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="products-empty" hidden>
+          <svg class="icon empty-icon" aria-hidden="true"><use href="#i-bag"/></svg>
+          <h2>No products found</h2>
+          <p>Try another search, or add your first product.</p>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div role="tabpanel" id="panel-orders" aria-labelledby="tab-orders" class="tab-panel" hidden>
+        <div class="admin-toolbar">
+          <label for="order-status-filter" class="visually-hidden">Filter by status</label>
+          <select id="order-status-filter" class="select select-sm">
+            <option value="all">All orders</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button type="button" class="btn btn-outline btn-sm" id="refresh-orders">
+            <svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg> Refresh
+          </button>
+          <p class="muted order-count" id="order-count" aria-live="polite"></p>
+        </div>
+        <div class="order-list" id="order-list"></div>
+        <div class="empty-state" id="orders-empty" hidden>
+          <svg class="icon empty-icon" aria-hidden="true"><use href="#i-bag"/></svg>
+          <h2>No orders yet</h2>
+          <p>Orders placed in the store will appear here.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- PRODUCT EDITOR -->
+  <dialog id="product-dialog" class="admin-dialog" aria-labelledby="dialog-title">
+    <form id="product-form" novalidate>
+      <div class="dialog-head">
+        <h2 id="dialog-title">Add product</h2>
+        <button type="button" class="icon-btn" data-close-dialog aria-label="Close">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <fieldset class="form-block">
+          <legend>Basics</legend>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="f-name">Product name</label>
+              <input id="f-name" name="name" type="text" maxlength="120" required aria-describedby="f-name-error">
+              <p class="field-error" id="f-name-error"></p>
+            </div>
+            <div class="field">
+              <label for="f-id">Product ID (used in the web address)</label>
+              <input id="f-id" name="id" type="text" maxlength="80" required aria-describedby="f-id-hint f-id-error" spellcheck="false">
+              <p class="field-hint" id="f-id-hint">Lowercase letters, numbers and hyphens. Can't be changed later.</p>
+              <p class="field-error" id="f-id-error"></p>
+            </div>
+            <div class="field">
+              <label for="f-brand">Brand</label>
+              <input id="f-brand" name="brand" type="text" maxlength="60">
+            </div>
+            <div class="field span-2">
+              <label for="f-category">Category</label>
+              <select id="f-category" name="category" class="select" required aria-describedby="f-category-error"></select>
+              <p class="field-error" id="f-category-error"></p>
+            </div>
+            <div class="field span-2">
+              <label for="f-description">Description</label>
+              <textarea id="f-description" name="description" rows="4" maxlength="2000"></textarea>
+            </div>
+            <div class="field span-2">
+              <label for="f-highlights">Key features (one per line)</label>
+              <textarea id="f-highlights" name="highlights" rows="3" maxlength="1000"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend>Price and stock</legend>
+          <div class="form-grid form-grid-3">
+            <div class="field">
+              <label for="f-price">Price ($)</label>
+              <input id="f-price" name="price" type="number" min="0" step="0.01" inputmode="decimal" required aria-describedby="f-price-error">
+              <p class="field-error" id="f-price-error"></p>
+            </div>
+            <div class="field">
+              <label for="f-old-price">Was price ($)</label>
+              <input id="f-old-price" name="old_price" type="number" min="0" step="0.01" inputmode="decimal" aria-describedby="f-old-price-hint f-old-price-error">
+              <p class="field-hint" id="f-old-price-hint">Optional. Shows a discount.</p>
+              <p class="field-error" id="f-old-price-error"></p>
+            </div>
+            <div class="field">
+              <label for="f-stock">Stock</label>
+              <input id="f-stock" name="stock" type="number" min="0" step="1" inputmode="numeric" required aria-describedby="f-stock-error">
+              <p class="field-error" id="f-stock-error"></p>
+            </div>
+            <div class="field">
+              <label for="f-featured">Featured order</label>
+              <input id="f-featured" name="featured" type="number" step="1" inputmode="numeric" aria-describedby="f-featured-hint f-featured-error">
+              <p class="field-hint" id="f-featured-hint">1 shows first.</p>
+              <p class="field-error" id="f-featured-error"></p>
+            </div>
+            <div class="field">
+              <label for="f-rating">Rating (0 to 5)</label>
+              <input id="f-rating" name="rating" type="number" min="0" max="5" step="0.1" inputmode="decimal" aria-describedby="f-rating-error">
+              <p class="field-error" id="f-rating-error"></p>
+            </div>
+            <div class="field">
+              <label for="f-reviews">Number of reviews</label>
+              <input id="f-reviews" name="reviews" type="number" min="0" step="1" inputmode="numeric" aria-describedby="f-reviews-error">
+              <p class="field-error" id="f-reviews-error"></p>
+            </div>
+          </div>
+          <div class="check-row">
+            <label class="check"><input type="checkbox" name="active" id="f-active"> Visible in store</label>
+            <label class="check"><input type="checkbox" name="is_new" id="f-is-new"> Show "New" tag</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend>Photos</legend>
+          <p class="field-hint">JPG, PNG or WebP, up to 5MB each. Square photos look best. The first photo is the main one.</p>
+          <ul class="image-list" id="image-list" aria-label="Product photos"></ul>
+          <div class="image-actions">
+            <label class="btn btn-outline btn-sm file-btn">
+              <svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>
+              <span>Upload photos</span>
+              <input type="file" id="f-images" accept="image/jpeg,image/png,image/webp" multiple class="visually-hidden">
+            </label>
+            <div class="url-add">
+              <label for="f-image-url" class="visually-hidden">Image link</label>
+              <input id="f-image-url" type="url" placeholder="…or paste an image link (https://)">
+              <button type="button" class="btn btn-ghost btn-sm" id="add-image-url">Add link</button>
+            </div>
+          </div>
+          <p class="upload-status" id="upload-status" aria-live="polite"></p>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend>Options (sizes, colours…)</legend>
+          <p class="field-hint">Write one option per line. To charge extra, add a bar and the amount, for example <code>16GB | 120</code>.</p>
+          <div class="variant-list" id="variant-list"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="add-variant">
+            <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Add option group
+          </button>
+        </fieldset>
+      </div>
+
+      <div class="dialog-foot">
+        <p class="form-alert" id="product-form-error" role="alert"></p>
+        <button type="button" class="btn btn-ghost" data-close-dialog>Cancel</button>
+        <button type="submit" class="btn btn-primary" id="save-product">Save product</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+</body>
+</html>
