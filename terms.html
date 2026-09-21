@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terms of service | Devhut Stores</title>
+  <meta name="description" content="The terms that apply when you use Devhut Stores and place orders.">
+  <meta name="theme-color" content="#0f7b5f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f7b5f'/%3E%3Cpath d='M14 30 32 14l18 16v20H14z' fill='%23f4b400'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('devhut:theme');
+        if (t !== 'dark' && t !== 'light') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="legal-page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Devhut Stores home">
+        <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14"/><path d="M14 30 32 14l18 16v20H14z"/></svg>
+        <span class="logo-text">Devhut<span>Stores</span></span>
+      </a>
+      <a href="index.html" class="btn btn-outline btn-sm">Back to the store</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <article class="container legal">
+      <h1>Terms of service</h1>
+      <p class="muted">Last updated: 21 September 2026</p>
+
+      <p>By using Devhut Stores or placing an order, you agree to these terms. Please read them. If you disagree, please don&rsquo;t use the store.</p>
+
+      <h2>1. Using the store</h2>
+      <p>You must be at least 18, or have a parent or guardian&rsquo;s permission, to place an order. Give accurate details and keep your account password private. You&rsquo;re responsible for activity on your account. Don&rsquo;t misuse the store, attempt to break or bypass its security, or use it for unlawful purposes.</p>
+
+      <h2>2. Accounts</h2>
+      <p>You can create an account with your email and a password, or sign in with Google. We may suspend or close accounts that break these terms. You can ask us to delete your account at any time.</p>
+
+      <h2>3. Products and prices</h2>
+      <p>We try to describe and photograph products accurately, but colours, images and packaging may differ slightly. Prices are shown in your chosen currency, converted from our base currency at the rates displayed, and may change without notice. The price you pay is the one confirmed when you place your order. If we spot an obvious pricing error we may cancel the order and refund you in full.</p>
+
+      <h2>4. Orders and payment</h2>
+      <p>Your order is an offer to buy. We accept it when we confirm it, and we may decline or cancel an order if an item is out of stock or we can&rsquo;t verify details. You can pay on delivery or by card. <strong>Card payment on this site is currently a demonstration and no real charge is made.</strong></p>
+
+      <h2>5. Delivery</h2>
+      <p>Standard delivery takes 3&ndash;5 business days and express 1&ndash;2 business days, after dispatch, within our delivery area. These are estimates rather than guarantees. Delivery fees are shown at checkout, and standard delivery is free on qualifying orders in our home country above the free-delivery threshold. Risk in the goods passes to you on delivery.</p>
+
+      <h2>6. Returns and refunds</h2>
+      <p>Most items can be returned within 7 days of delivery if they are unused and in their original packaging. Perishable goods (such as fresh groceries), opened hygiene products and personalised items can&rsquo;t be returned unless faulty. Faulty or wrongly supplied items will be replaced or refunded. Contact <a href="mailto:help@devhutstores.example">help@devhutstores.example</a> with your order number to start a return. Nothing in these terms limits your statutory consumer rights.</p>
+
+      <h2>7. Our liability</h2>
+      <p>We don&rsquo;t exclude liability for anything the law doesn&rsquo;t allow us to exclude. Otherwise, we&rsquo;re not liable for indirect or consequential losses, or for problems caused by events beyond our reasonable control, and our total liability for an order is limited to the amount you paid for it.</p>
+
+      <h2>8. Intellectual property</h2>
+      <p>The store&rsquo;s design, text and logos belong to Devhut Stores or its licensors. Don&rsquo;t copy or reuse them without permission.</p>
+
+      <h2>9. Privacy</h2>
+      <p>How we handle your data is explained in our <a href="privacy.html">privacy policy</a>.</p>
+
+      <h2>10. Changes and contact</h2>
+      <p>We may update these terms and will change the date above when we do. Use of the store after a change means you accept it. Questions: <a href="mailto:help@devhutstores.example">help@devhutstores.example</a>.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-brand">Devhut Stores</p>
+        <p class="muted"><a href="privacy.html">Privacy policy</a> · <a href="terms.html">Terms of service</a></p>
+      </div>
+      <p class="muted footer-copy">© <span id="year"></span> Devhut Stores.</p>
+    </div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

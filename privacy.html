@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy policy | Devhut Stores</title>
+  <meta name="description" content="How Devhut Stores collects, uses and protects your personal information.">
+  <meta name="theme-color" content="#0f7b5f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f7b5f'/%3E%3Cpath d='M14 30 32 14l18 16v20H14z' fill='%23f4b400'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('devhut:theme');
+        if (t !== 'dark' && t !== 'light') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="legal-page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Devhut Stores home">
+        <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14"/><path d="M14 30 32 14l18 16v20H14z"/></svg>
+        <span class="logo-text">Devhut<span>Stores</span></span>
+      </a>
+      <a href="index.html" class="btn btn-outline btn-sm">Back to the store</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <article class="container legal">
+      <h1>Privacy policy</h1>
+      <p class="muted">Last updated: 21 September 2026</p>
+
+      <p>This policy explains what Devhut Stores collects when you browse, create an account or place an order, and what we do with it. Questions? Write to <a href="mailto:help@devhutstores.example">help@devhutstores.example</a>.</p>
+
+      <h2>1. What we collect</h2>
+      <ul>
+        <li><strong>Account details.</strong> If you create an account: your name, email address and a password (stored only as a secure hash by our authentication provider). If you sign in with Google, we receive your name, email address and profile details that Google shares with us. We never see your Google password.</li>
+        <li><strong>Order details.</strong> When you check out: your name, email, phone number, delivery address, the items you ordered, your chosen delivery and payment method, and the order total.</li>
+        <li><strong>Card details.</strong> Card payment is a demonstration. Card numbers you type are checked in your browser and are <strong>not</strong> sent to us or stored.</li>
+        <li><strong>On your device.</strong> Your cart, wishlist, theme, currency choice and sign-in session are kept in your browser&rsquo;s local storage so the store remembers you. We don&rsquo;t use advertising or analytics cookies.</li>
+      </ul>
+
+      <h2>2. How we use it</h2>
+      <ul>
+        <li>To create and secure your account and keep you signed in.</li>
+        <li>To process, deliver and support your orders, including contacting you about them.</li>
+        <li>To prevent fraud and keep the store working.</li>
+      </ul>
+      <p>We don&rsquo;t sell your personal information and we don&rsquo;t use it for advertising.</p>
+
+      <h2>3. Who we share it with</h2>
+      <ul>
+        <li><strong>Supabase</strong> hosts our database and handles sign-in. Account and order data is stored there.</li>
+        <li><strong>Google</strong>, only if you choose &ldquo;Continue with Google&rdquo;. Google&rsquo;s own privacy policy applies to that sign-in.</li>
+        <li><strong>Delivery partners</strong> receive your name, phone number and address so they can deliver your order.</li>
+        <li><strong>Hosting and content providers</strong> (our web host, Google Fonts, jsDelivr and Unsplash) receive your IP address and browser details when your browser loads pages, fonts, scripts and images.</li>
+        <li>Authorities, when the law requires it.</li>
+      </ul>
+
+      <h2>4. How long we keep it</h2>
+      <p>We keep order records for as long as needed for delivery, returns, accounting and legal obligations. Account details are kept until you ask us to delete your account.</p>
+
+      <h2>5. Your choices and rights</h2>
+      <p>You can ask us to access, correct or delete the personal data we hold about you, or object to how we use it, by emailing us at the address above. You can sign out at any time from the account menu, and clear your cart, wishlist and session by clearing this site&rsquo;s data in your browser. Depending on where you live, you may also have the right to complain to your local data protection authority.</p>
+
+      <h2>6. Security</h2>
+      <p>Data is sent over HTTPS and protected by access rules in our database, so shoppers can&rsquo;t read other people&rsquo;s orders. No online service is perfectly secure, so please use a strong, unique password.</p>
+
+      <h2>7. Children</h2>
+      <p>The store is not aimed at children under 13, and we don&rsquo;t knowingly collect their data.</p>
+
+      <h2>8. Changes</h2>
+      <p>If we change this policy we&rsquo;ll update the date above. Continued use of the store means you accept the updated policy.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-brand">Devhut Stores</p>
+        <p class="muted"><a href="privacy.html">Privacy policy</a> · <a href="terms.html">Terms of service</a></p>
+      </div>
+      <p class="muted footer-copy">© <span id="year"></span> Devhut Stores.</p>
+    </div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

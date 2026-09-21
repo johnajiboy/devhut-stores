@@ -1175,7 +1175,7 @@ img.fade.is-loaded { opacity: 1; }
 .footer-brand { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); margin-bottom: 4px; }
 .footer-heading { font-weight: 700; margin-bottom: 4px; }
 @media (min-width: 700px) {
-  .footer-inner { grid-template-columns: 2fr 1fr; }
+  .footer-inner { grid-template-columns: 2fr 1fr 1fr; }
   .footer-copy { grid-column: 1 / -1; }
 }
 
@@ -1189,3 +1189,35 @@ img.fade.is-loaded { opacity: 1; }
   }
   .hero-feature { transform: none !important; }
 }
+
+/* 16. ACCOUNT DIALOG ------------------------------------------------------ */
+.account-btn { width: auto; padding: 0 var(--space-3); gap: 6px; }
+.account-btn-label { font-size: var(--fs-sm); font-weight: 600; max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 640px) { .account-btn-label { display: none; } .account-btn { padding: 0; width: 44px; } }
+.auth-dialog {
+  width: min(420px, calc(100vw - 32px)); padding: var(--space-5);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg);
+}
+.auth-dialog::backdrop { background: var(--overlay); }
+.auth-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+.auth-head h2 { font-family: var(--font-display); font-size: var(--fs-xl); margin: 0; }
+.auth-dialog form { display: grid; gap: var(--space-3); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: var(--space-4); background: var(--surface-2); border-radius: var(--radius); }
+.auth-tabs button { min-height: 40px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
+.auth-tabs button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+.btn-google { gap: var(--space-2); }
+.auth-divider { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-4) 0; color: var(--muted); font-size: var(--fs-sm); }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.auth-message { margin: 0; padding: var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-sm); font-weight: 500; background: var(--danger-soft); color: var(--danger); }
+.auth-message.is-info { background: var(--primary-soft); color: var(--primary); }
+.auth-who { display: grid; gap: 2px; margin: 0 0 var(--space-4); overflow-wrap: anywhere; }
+
+/* 17. LEGAL PAGES ---------------------------------------------------------- */
+.legal { max-width: 760px; padding-block: var(--space-6) var(--space-7); }
+.legal h1 { font-family: var(--font-display); font-size: var(--fs-2xl); margin: 0 0 var(--space-2); }
+.legal h2 { font-size: var(--fs-lg); margin: var(--space-6) 0 var(--space-2); }
+.legal p, .legal li { line-height: 1.7; }
+.legal ul { padding-left: 1.25rem; display: grid; gap: var(--space-2); }
+.legal a, .footer-inner a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+body.legal-page { display: flex; flex-direction: column; min-height: 100vh; }

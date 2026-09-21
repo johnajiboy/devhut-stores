@@ -74,7 +74,11 @@ function setCurrencies(rows) {
 // Supabase client (library loaded from CDN in index.html, keys in config.js)
 const CONFIG = window.DEVHUT_CONFIG ?? {};
 const isConfigured = Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey && !CONFIG.supabaseUrl.includes('YOUR-PROJECT'));
-const db = isConfigured && window.supabase ? window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey) : null;
+const db = isConfigured && window.supabase ? window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, {
+  // PKCE keeps OAuth/email links out of the URL hash (the hash is the router).
+  // A separate storage key stops the admin page's sign-out from ending shopper sessions.
+  auth: { flowType: 'pkce', storageKey: 'devhut-shop-auth' },
+}) : null;
 
 /* -------------------------------------------------------------------------
    2. PRODUCT DATA (loaded from Supabase)
