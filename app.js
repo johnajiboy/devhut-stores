@@ -1383,7 +1383,7 @@ function applyTheme(theme) {
 /** Rebuilds the currency picker options and reflects the active currency. */
 function renderCurrencySelect() {
   dom.currencySelect.replaceChildren(...CURRENCIES.map((c) =>
-    h('option', { value: c.code }, `${c.code} — ${c.name}`)));
+    h('option', { value: c.code }, c.code)));
   dom.currencySelect.value = currentCurrency;
 }
 
