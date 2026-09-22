@@ -15,7 +15,10 @@ static files on [Vercel](https://vercel.com).
 
 ## Setup notes
 
-- Run `setup.sql`, then `seed_products.sql` (the extra catalogue: every category ends up with 50+ products).
+- Run `setup.sql`, then `seed_products.sql` (the extra catalogue: every category ends up with 50+ products,
+  256 of the 264 come with a real photo already; the other 8 show a category placeholder until you upload
+  one in Admin > Products). If you already ran an older `seed_products.sql` without photos, run
+  `update_product_images.sql` instead to add them without re-inserting the products.
 - **Google sign-in**: create an OAuth client in Google Cloud Console (type *Web application*) with the
   authorised redirect URI `https://<your-project>.supabase.co/auth/v1/callback`. In Supabase go to
   Authentication > Providers > Google, enable it and paste the client ID and secret. Then add your site
