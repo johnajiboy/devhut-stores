@@ -19,6 +19,9 @@ static files on [Vercel](https://vercel.com).
   256 of the 264 come with a real photo already; the other 8 show a category placeholder until you upload
   one in Admin > Products). If you already ran an older `seed_products.sql` without photos, run
   `update_product_images.sql` instead to add them without re-inserting the products.
+- In a hurry to see it live? Run `seed_products_quickstart.sql` instead: 30 products per category
+  (150 total), all with a real photo, 48 already with a verified photo credit so the (i) button on
+  their product page works immediately. You can run `seed_products.sql` afterwards for the rest.
 - **Google sign-in**: create an OAuth client in Google Cloud Console (type *Web application*) with the
   authorised redirect URI `https://<your-project>.supabase.co/auth/v1/callback`. In Supabase go to
   Authentication > Providers > Google, enable it and paste the client ID and secret. Then add your site
