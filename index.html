@@ -109,7 +109,7 @@
         <div class="hero">
           <div class="hero-copy">
             <h1 id="home-title" tabindex="-1" data-view-heading>Your weekly shop, gadgets and home upgrades in one basket.</h1>
-            <p class="hero-lead">Groceries, electronics, household equipment and clothing, delivered to your door. Free standard delivery on orders over $100.</p>
+            <p class="hero-lead">Groceries, electronics, household equipment and clothing, delivered to your door. Free standard delivery on orders over <span class="js-free-shipping-amount">$100</span>.</p>
             <div class="flash">
               <p class="flash-label">Flash sale ends in</p>
               <p class="flash-timer" role="timer" aria-label="Time left in today's flash sale" id="flash-timer">
@@ -122,7 +122,7 @@
         </div>
 
         <ul class="perks" aria-label="Why shop with us">
-          <li><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg><span><strong>Free delivery</strong> on orders over $100</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg><span><strong>Free delivery</strong> on orders over <span class="js-free-shipping-amount">$100</span></span></li>
           <li><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span><strong>Secure checkout</strong> with pay on delivery</span></li>
           <li><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg><span><strong>7-day returns</strong> on most items</span></li>
         </ul>
@@ -311,7 +311,7 @@
                 <label class="choice">
                   <input type="radio" name="delivery" value="express">
                   <span class="choice-body"><strong>Express</strong><span class="muted">1–2 business days</span></span>
-                  <span class="choice-price">$14.99</span>
+                  <span class="choice-price" id="express-fee">$14.99</span>
                 </label>
               </div>
             </fieldset>

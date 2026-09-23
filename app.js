@@ -597,6 +597,7 @@ function cacheDom() {
     cardFields: $('#card-fields'),
     placeOrder: $('#place-order'),
     standardFee: $('#standard-fee'),
+    expressFee: $('#express-fee'),
     summaryItems: $('#summary-items'),
     summarySubtotal: $('#summary-subtotal'),
     summaryShipping: $('#summary-shipping'),
@@ -1226,6 +1227,12 @@ function renderOrderSummary() {
   dom.summaryShipping.textContent = totals.shipping === 0 ? 'Free' : formatPrice(totals.shipping);
   dom.summaryTotal.textContent = formatPrice(totals.total);
   dom.standardFee.textContent = totals.subtotal >= FREE_SHIPPING_THRESHOLD ? 'Free' : formatPrice(DELIVERY_OPTIONS.standard.fee);
+  dom.expressFee.textContent = formatPrice(DELIVERY_OPTIONS.express.fee);
+}
+
+/** Updates every "Free delivery over [amount]" mention with the selected currency's threshold. */
+function renderFreeShippingAmount() {
+  $$('.js-free-shipping-amount').forEach((el) => { el.textContent = formatPrice(FREE_SHIPPING_THRESHOLD); });
 }
 
 function syncPaymentFields() {
@@ -1510,6 +1517,7 @@ function renderCurrencySelect() {
 /** Re-renders every price on screen after the shopper switches currency. */
 function refreshForCurrency() {
   cardCache.clear();
+  renderFreeShippingAmount();
   renderCategoryControls();
   renderHeroFeature();
   renderCart();
@@ -1782,6 +1790,7 @@ async function loadCatalog() {
   Cart.load();
   Wishlist.load();
   renderCurrencySelect();
+  renderFreeShippingAmount();
   renderCategoryControls();
   renderHeroFeature();
   renderCart();
