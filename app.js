@@ -219,6 +219,89 @@ function writeStorage(key, value) {
    Unsplash URLs get resized on the fly; uploaded images are used as-is. */
 const isUnsplash = (url) => /^https:\/\/images\.unsplash\.com\//.test(url);
 
+/* Unsplash photo credits, required by Unsplash's API guidelines for hotlinked
+   photos: keyed by the raw image URL (before sizedImage adds resize params).
+   Covers the extra catalogue seeded from seed_products.sql. Products with an
+   uploaded photo, a Devhut Stores placeholder, or a photo not yet matched to a
+   photographer here (including the original 18 sample products) simply have no
+   entry, so the credit UI stays hidden for them rather than guessing. */
+const PHOTO_CREDITS = {
+  'https://images.unsplash.com/photo-1547658718-1cdaa0852790': { name: 'Daniel Korpai', username: 'danielkorpai' },
+  'https://images.unsplash.com/photo-1548486354-1b48379fd7a7': { name: 'mknd', username: 'm_k_nd' },
+  'https://images.unsplash.com/photo-1484506399805-c273b8e91dce': { name: 'Jakob Owens', username: 'jakobowens1' },
+  'https://images.unsplash.com/photo-1516177609387-9bad55a45194': { name: 'Frame Kings', username: 'framekings' },
+  'https://images.unsplash.com/photo-1547104442-044448b73426': { name: 'Sincerely Media', username: 'sincerelymedia' },
+  'https://images.unsplash.com/photo-1511794322962-129ddbd0af38': { name: 'Miguel Carraça', username: 'mcmiles' },
+  'https://images.unsplash.com/photo-1749105862005-6e0409c8c55a': { name: 'Gaia&Co', username: 'gaiacoffee' },
+  'https://images.unsplash.com/photo-1644432757699-bb5a01e8fb0e': { name: 'Karyna Panchenko', username: 'karyna_panchenko' },
+  'https://images.unsplash.com/photo-1653174577821-9ab410d92d44': { name: 'Gabre Cameron', username: 'gabrecameron' },
+  'https://images.unsplash.com/photo-1578587018452-892bacefd3f2': { name: 'Matas Katinas', username: 'matuxee' },
+  'https://images.unsplash.com/photo-1417976737285-aea15c203d4a': { name: 'Maria Molinero', username: 'mariamolinero' },
+  'https://images.unsplash.com/photo-1542728929-2b5d9a0c8d48': { name: 'Sincerely Media', username: 'sincerelymedia' },
+  'https://images.unsplash.com/photo-1565151443833-29bf2ba5dd8d': { name: 'Ronan Furuta', username: 'ronan18' },
+  'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85': { name: 'David van Dijk', username: 'dvandijk' },
+  'https://images.unsplash.com/photo-1594303471920-b66b769a6b8f': { name: 'Alessio Billeci', username: 'billimichiamo' },
+  'https://images.unsplash.com/photo-1616296425622-4560a2ad83de': { name: 'Nerfee Mirandilla', username: 'nerfee' },
+  'https://images.unsplash.com/photo-1760368104013-3a52a7f4e07b': { name: 'Ignat Kushnarev', username: 'ignatkushanrev' },
+  'https://images.unsplash.com/photo-1588689115724-a624efec3c93': { name: 'Batu Gezer', username: 'gezerbatu' },
+  'https://images.unsplash.com/photo-1557848979-f13d18a41bb2': { name: 'Mr BIMSKY', username: 'mrbimsky' },
+  'https://images.unsplash.com/photo-1789110520665-f07353f0afbe': { name: 'engin akyurt', username: 'enginakyurt' },
+  'https://images.unsplash.com/photo-1558906050-d6d6aa390fd3': { name: 'Susan Holt Simpson', username: 'shs521' },
+  'https://images.unsplash.com/photo-1582735689369-4fe89db7114c': { name: 'Annie Spratt', username: 'anniespratt' },
+  'https://images.unsplash.com/photo-1499033300314-43c811cff6d5': { name: 'Adam Birkett', username: 'abrkett' },
+  'https://images.unsplash.com/photo-1586201375761-83865001e31c': { name: 'Pierre Bamin', username: 'bamin' },
+  'https://images.unsplash.com/photo-1573066380308-24ff4c273dbc': { name: 'Ashkan Forouzani', username: 'ashkfor121' },
+  'https://images.unsplash.com/photo-1612817159623-0399784fd0ce': { name: 'Paul Cuoco', username: 'notafraid' },
+  'https://images.unsplash.com/photo-1626697556426-8a55a8af4999': { name: 'Towfiqu barbhuiya', username: 'towfiqu999999' },
+  'https://images.unsplash.com/photo-1611864583067-b002fdc4fa29': { name: 'Miguel Angel  Avila', username: 'miketopus' },
+  'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf': { name: 'Nimble Made', username: 'nimblemade' },
+  'https://images.unsplash.com/photo-1703081167394-bb6d575248d0': { name: 'Rohan Krishnan', username: 'rohankrishnann' },
+  'https://images.unsplash.com/flagged/photo-1572609239482-d3a83f976aa0': { name: 'Chauhan Moniz', username: 'moniz437' },
+  'https://images.unsplash.com/photo-1707945272540-35fda815ebbf': { name: 'Ezekiel See', username: 'ezekiel_see' },
+  'https://images.unsplash.com/photo-1589995186011-a7b485edc4bf': { name: 'Denny Müller', username: 'redaquamedia' },
+  'https://images.unsplash.com/photo-1779896412214-52031d27211a': { name: 'Sandisk', username: 'sandisk' },
+  'https://images.unsplash.com/photo-1566554738544-d962991c3fee': { name: 'I\'M ZION', username: 'ziontech' },
+  'https://images.unsplash.com/photo-1706765779494-2705542ebe74': { name: 'CGXL MEDIA', username: 'cgxlmedia' },
+  'https://images.unsplash.com/photo-1558317374-24793bc9f2fb': { name: 'Kowon vn', username: 'kowon' },
+  'https://images.unsplash.com/photo-1634406722002-95ab36228647': { name: 'Fer Troulik', username: 'fertroulik' },
+  'https://images.unsplash.com/photo-1704775989365-eebfd4659a23': { name: 'GLOBALDSIO IT SOLUTION', username: 'globaldsioitsolution' },
+  'https://images.unsplash.com/photo-1522844990619-4951c40f7eda': { name: 'i yunmai', username: 'yunmai' },
+  'https://images.unsplash.com/photo-1739268984311-b478fccf256e': { name: 'Alin Gavriliuc', username: 'alingavriliuc' },
+  'https://images.unsplash.com/photo-1709534486708-fb8f94150d0a': { name: 'Jakub Żerdzicki', username: 'jakubzerdzicki' },
+  'https://images.unsplash.com/photo-1502404768591-f24d06b7a366': { name: 'Dose Media', username: 'dose' },
+  'https://images.unsplash.com/photo-1623126908029-58cb08a2b272': { name: 's w', username: 'serwin365' },
+  'https://images.unsplash.com/photo-1587033411391-5d9e51cce126': { name: 'Rahul Chakraborty', username: 'hckmstrrahul' },
+  'https://images.unsplash.com/photo-1623251609314-97cc1f84e3ed': { name: 'Riekus', username: 'riekus' },
+  'https://images.unsplash.com/photo-1601436423474-51738541c1b1': { name: 'Sandi Benedicta', username: 'sendun' },
+  'https://images.unsplash.com/photo-1524805444758-089113d48a6d': { name: 'Pat Taylor', username: 'ptaylor_' },
+  // More credits backfill as the rest of the catalogue's photos are matched to a
+  // photographer; see scripts/photo-credits in the project notes.
+};
+
+/** Credit for a raw (un-resized) Unsplash image URL, or null if unknown. */
+function creditFor(url) {
+  if (!url) return null;
+  return PHOTO_CREDITS[url.split('?')[0]] ?? null;
+}
+
+/** Adds Unsplash's required utm_source/utm_medium to a link to unsplash.com. */
+function unsplashLink(path) {
+  const url = new URL(path, 'https://unsplash.com');
+  url.searchParams.set('utm_source', 'devhut_stores');
+  url.searchParams.set('utm_medium', 'referral');
+  return url.toString();
+}
+
+/** "Photo by [name] on Unsplash", both names linking out, per Unsplash's API guidelines. */
+function creditEl(credit, { compact = false } = {}) {
+  if (!credit?.name) return null;
+  return h('p', { class: `photo-credit${compact ? ' photo-credit-compact' : ''}` },
+    'Photo by ',
+    h('a', { href: unsplashLink(`/@${credit.username}`), target: '_blank', rel: 'noopener noreferrer' }, credit.name),
+    ' on ',
+    h('a', { href: unsplashLink('/'), target: '_blank', rel: 'noopener noreferrer' }, 'Unsplash'));
+}
+
 function sizedImage(url, { w = 600, h: height = w, zoom, fpx = 0.5, fpy = 0.5 } = {}) {
   if (!isUnsplash(url)) return url;
   const params = new URLSearchParams({ auto: 'format', fit: 'crop', w, h: height, q: '75' });
@@ -268,19 +351,22 @@ function buildGallery(product) {
   const { images } = product;
   if (images.length === 0) {
     const src = placeholderImage(product);
-    return [{ label: 'Photo', src, thumb: src }];
+    return [{ label: 'Photo', src, thumb: src, credit: null }];
   }
   if (images.length === 1 && isUnsplash(images[0])) {
+    const credit = creditFor(images[0]);
     return ZOOM_VIEWS.map((view) => ({
       label: view.label,
       src: sizedImage(images[0], { w: 900, ...view }),
       thumb: sizedImage(images[0], { w: 160, ...view }),
+      credit,
     }));
   }
   return images.map((url, i) => ({
     label: `Photo ${i + 1}`,
     src: sizedImage(url, { w: 900 }),
     thumb: sizedImage(url, { w: 160 }),
+    credit: creditFor(url),
   }));
 }
 
@@ -844,6 +930,34 @@ function renderProductDetail(id) {
       onClick: () => showImage(i),
     }, createImage(product, img.thumb, { alt: '', size: 160 })));
 
+  // Photo credit: a small toggle over the photo opens a panel with the Unsplash
+  // attribution, instead of always showing it. Hidden entirely when the current
+  // photo has no known credit (an uploaded photo, or one not yet matched).
+  const creditPanelId = `gallery-credit-${product.id}`;
+  const creditPanel = h('div', { class: 'gallery-credit-panel', id: creditPanelId, hidden: true });
+  const creditToggle = h('button', {
+    type: 'button', class: 'gallery-credit-toggle', 'aria-label': 'Photo credit',
+    'aria-expanded': 'false', 'aria-controls': creditPanelId, hidden: true,
+  }, 'ⓘ');
+  creditToggle.addEventListener('click', () => {
+    const opening = creditPanel.hidden;
+    creditPanel.hidden = !opening;
+    creditToggle.setAttribute('aria-expanded', String(opening));
+  });
+
+  function closeCreditPanel() {
+    creditPanel.hidden = true;
+    creditToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function updateCredit() {
+    const credit = gallery[active].credit;
+    closeCreditPanel();
+    creditToggle.hidden = !credit?.name;
+    if (credit?.name) creditPanel.replaceChildren(creditEl(credit));
+    else creditPanel.replaceChildren();
+  }
+
   function showImage(index) {
     active = (index + gallery.length) % gallery.length;
     delete mainImg.dataset.fallback;
@@ -852,10 +966,11 @@ function renderProductDetail(id) {
     mainImg.alt = `${product.name}, ${gallery[active].label}`;
     counter.textContent = `${active + 1} / ${gallery.length}`;
     thumbButtons.forEach((btn, i) => btn.setAttribute('aria-current', String(i === active)));
+    updateCredit();
   }
 
   const galleryEl = h('div', { class: 'gallery' },
-    h('div', { class: 'gallery-main' }, mainImg,
+    h('div', { class: 'gallery-main' }, mainImg, creditToggle, creditPanel,
       gallery.length > 1 ? [
         h('button', { type: 'button', class: 'gallery-nav prev', 'aria-label': 'Previous image', onClick: () => showImage(active - 1) }, icon('chevron-left')),
         h('button', { type: 'button', class: 'gallery-nav next', 'aria-label': 'Next image', onClick: () => showImage(active + 1) }, icon('chevron-right')),
@@ -864,10 +979,11 @@ function renderProductDetail(id) {
       ? h('ul', { class: 'gallery-thumbs', 'aria-label': 'Product images' }, thumbButtons.map((btn) => h('li', {}, btn)))
       : null);
 
-  // Arrow keys switch images while focus is inside the gallery
+  // Arrow keys switch images, Escape closes the credit panel, while focus is inside the gallery
   galleryEl.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') { showImage(active - 1); e.preventDefault(); }
     if (e.key === 'ArrowRight') { showImage(active + 1); e.preventDefault(); }
+    if (e.key === 'Escape' && !creditPanel.hidden) { closeCreditPanel(); e.preventDefault(); }
   });
   showImage(0);
 

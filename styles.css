@@ -835,6 +835,45 @@ img.fade.is-loaded { opacity: 1; }
   font-size: var(--fs-xs);
   font-weight: 600;
 }
+.gallery-credit-toggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.4);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.gallery-credit-toggle:hover,
+.gallery-credit-toggle[aria-expanded="true"] { background: rgb(0 0 0 / 0.65); }
+.gallery-credit-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-2) var(--space-3);
+  background: rgb(0 0 0 / 0.72);
+}
+.gallery-credit-panel .photo-credit {
+  margin: 0;
+  color: #fff;
+  font-size: var(--fs-xs);
+}
+.gallery-credit-panel .photo-credit a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.gallery-credit-panel .photo-credit a:hover { text-decoration-thickness: 2px; }
 .gallery-thumbs { display: flex; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
 .gallery-thumb {
   width: 72px;
