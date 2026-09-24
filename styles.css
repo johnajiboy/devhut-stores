@@ -673,7 +673,6 @@ legend { padding: 0; }
   padding: var(--space-4);
   padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
   padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
-  overflow-y: auto;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
   visibility: hidden;
@@ -726,7 +725,6 @@ legend { padding: 0; }
     visibility: visible;
     transform: none;
     transition: none;
-    max-height: calc(100vh - var(--header-h) - 48px);
   }
   .filters-close, .filters-open, .filters-apply { display: none; }
 }
