@@ -1748,8 +1748,48 @@ function showView(name, { focus = true } = {}) {
   }
 }
 
+/** True for a hash Supabase itself appended (an auth redirect), never one of our own routes. */
+const isSupabaseAuthHash = (hash) =>
+  /^#(error=|access_token=|refresh_token=)/.test(hash) || /[?&#](type=recovery|type=signup|type=invite)/.test(hash);
+
+/**
+ * Supabase's email/OAuth redirects land back on "/", sometimes with the result in the query
+ * string, sometimes in the hash, sometimes (an expired or reused confirmation link) both at
+ * once, e.g. "/?error=access_denied&error_code=otp_expired#error=access_denied&...&sb=". Our
+ * router only understands hashes it owns ("#/", "#/product/...", ...), so left alone a hash
+ * like that falls through to the not-found page. Handle it here, before router() ever sees it.
+ */
+function handleAuthRedirect() {
+  const hash = location.hash;
+  const params = new URLSearchParams(location.search);
+  if (!params.has('error') && !isSupabaseAuthHash(hash)) return;
+
+  if (!params.has('error') && hash) {
+    // The error can also arrive only in the hash ("#error=...&error_code=...").
+    new URLSearchParams(hash.replace(/^#/, '')).forEach((v, k) => params.set(k, v));
+  }
+
+  const errorCode = params.get('error_code');
+  const description = params.get('error_description');
+  if (params.get('error')) {
+    toast(
+      errorCode === 'otp_expired'
+        ? 'That confirmation link has expired. Please sign in or sign up again.'
+        : (description ? description.replace(/\+/g, ' ') : 'That link is invalid or has expired. Please try again.'),
+      { type: 'error', duration: 6000 },
+    );
+  }
+  // Supabase's own client already reads a successful "?code=" from here before this runs;
+  // either way, drop every auth param so the router starts clean on the home route.
+  history.replaceState(null, '', location.pathname);
+}
+
 function router() {
   if (!ui.ready) return;                 // routes run once the catalogue has loaded
+  // Belt and braces: handleAuthRedirect() already clears this on page load, but guard here
+  // too in case an auth-shaped hash ever reaches us via hashchange instead. replaceState()
+  // doesn't fire its own hashchange, so re-run the router once the hash is clean.
+  if (isSupabaseAuthHash(location.hash)) { handleAuthRedirect(); router(); return; }
   const hash = location.hash || '#/';
   const previousView = ui.view;
   if (previousView === 'home') ui.homeScrollY = window.scrollY;
@@ -2027,6 +2067,7 @@ function init() {
   cacheDom();
   applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
   $('#year').textContent = String(new Date().getFullYear());
+  handleAuthRedirect();               // before the router ever runs, in case Supabase sent us back here
 
   startFlashTimer();
   syncPaymentFields();
