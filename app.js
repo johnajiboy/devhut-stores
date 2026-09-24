@@ -886,7 +886,7 @@ function createProductCard(product) {
       wishButton(product),
       h('div', { class: 'card-body' },
         h('p', { class: 'card-category' }, getCategoryLabel(product.category)),
-        h('h3', { class: 'card-title' }, h('a', { href: url }, product.name)),
+        h('h3', { class: 'card-title' }, h('a', { href: url }, h('span', { class: 'card-title-text' }, product.name))),
         ratingEl(product),
         priceEl(product),
         product.stock > 0 && product.stock <= 5 ? h('p', { class: 'stock-low' }, `Only ${product.stock} left`) : null,
@@ -1069,7 +1069,7 @@ function renderHeroFeature() {
       discount ? h('span', { class: 'tag tag-discount' }, `-${discount}%`) : null),
     h('div', {},
       h('p', { class: 'hero-feature-kicker' }, 'Deal of the day'),
-      h('p', { class: 'hero-feature-name' }, h('a', { href: url }, product.name)),
+      h('p', { class: 'hero-feature-name' }, h('a', { href: url }, h('span', { class: 'hero-feature-name-text' }, product.name))),
       priceEl(product)));
 }
 

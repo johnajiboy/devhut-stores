@@ -179,7 +179,10 @@ legend { padding: 0; }
   left: var(--space-3);
   top: -100px;
   z-index: 100;
-  padding: var(--space-2) var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
   background: var(--primary);
   color: var(--on-primary);
   border-radius: var(--radius-sm);
@@ -233,7 +236,7 @@ legend { padding: 0; }
 .btn-ghost { background: transparent; color: var(--text); }
 .btn-ghost:hover { background: var(--surface-2); }
 
-.btn-sm { min-height: 38px; padding: 0 var(--space-4); font-size: var(--fs-sm); }
+.btn-sm { min-height: 44px; padding: 0 var(--space-4); font-size: var(--fs-sm); }
 .btn-lg { min-height: 52px; font-size: var(--fs-md); padding: 0 var(--space-6); }
 .btn-block { width: 100%; }
 .btn .icon { width: 18px; height: 18px; }
@@ -257,7 +260,7 @@ legend { padding: 0; }
 }
 .icon-btn:hover { background: var(--surface-2); }
 .icon-btn .icon { width: 22px; height: 22px; }
-.icon-btn-sm { min-width: 36px; height: 36px; }
+.icon-btn-sm { min-width: 44px; height: 44px; }
 .icon-btn-sm .icon { width: 18px; height: 18px; }
 
 .badge {
@@ -316,6 +319,11 @@ legend { padding: 0; }
 .field-error { color: var(--danger); font-size: var(--fs-sm); font-weight: 500; min-height: 0; }
 .field-error:empty { display: none; }
 .field-hint { font-size: var(--fs-xs); color: var(--muted); }
+/* Keeps "Privacy policy" from splitting across a line wrap. Not given the
+   usual 44px hit-slop here: the submit button sits directly below in a
+   12px gap, and extending into it risks misclicks on Sign in/Create
+   account -- worse than this link being a little small. */
+.field-hint a { white-space: nowrap; }
 
 /* Quantity stepper */
 .qty {
@@ -328,8 +336,8 @@ legend { padding: 0; }
 .qty-btn {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
@@ -348,7 +356,7 @@ legend { padding: 0; }
 }
 .qty-input::-webkit-outer-spin-button,
 .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.qty-sm .qty-btn { width: 34px; height: 34px; }
+.qty-sm .qty-btn { width: 44px; height: 44px; }
 .qty-sm .qty-input { width: 32px; font-size: var(--fs-sm); }
 
 /* Stars: a gradient clipped to the ★ glyphs shows fractional ratings */
@@ -385,6 +393,9 @@ legend { padding: 0; }
   z-index: 40;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  /* Keeps the header's content clear of the iPhone notch/Dynamic Island when
+     the site is added to the home screen (0px on every other device). */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .header-inner {
@@ -401,6 +412,7 @@ legend { padding: 0; }
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: 44px;
   text-decoration: none;
   width: fit-content;
 }
@@ -482,7 +494,7 @@ legend { padding: 0; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 var(--space-4);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-pill);
@@ -572,18 +584,20 @@ legend { padding: 0; }
 .hero-feature-media .tag { position: absolute; top: 6px; left: 6px; }
 .hero-feature-kicker { font-size: var(--fs-sm); color: var(--muted); font-weight: 600; }
 @media (max-width: 480px) { .hero-feature { grid-template-columns: 84px minmax(0, 1fr); gap: var(--space-3); } }
-.hero-feature-name {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--fs-lg);
-  margin: 2px 0 6px;
+.hero-feature-name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-lg); margin: 2px 0 6px; }
+.hero-feature-name a { position: relative; display: block; text-decoration: none; }
+/* Line-clamp lives on the inner span, not the link: -webkit-line-clamp only
+   clamps its own direct inline content, so putting the link's hit-slop
+   (which needs position:relative + display:block) on the same element that's
+   clamped would break the clamp. */
+.hero-feature-name-text {
   overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.hero-feature-name a { text-decoration: none; }
+.hero-feature-name a::before { content: ""; position: absolute; inset: -12px 0; }
 .hero-feature-name a:hover { text-decoration: underline; }
 .hero-feature .price { flex-wrap: wrap; }
 .hero-feature .price-now { white-space: nowrap; }
@@ -634,7 +648,7 @@ legend { padding: 0; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 32px;
+  min-height: 44px;
   padding: 0 6px 0 12px;
   border: 0;
   border-radius: var(--radius-pill);
@@ -657,6 +671,8 @@ legend { padding: 0; }
   flex-direction: column;
   gap: var(--space-5);
   padding: var(--space-4);
+  padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
@@ -676,7 +692,7 @@ legend { padding: 0; }
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -691,7 +707,7 @@ legend { padding: 0; }
 .price-sep { padding-bottom: 11px; color: var(--muted); font-size: var(--fs-sm); }
 
 .price-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-3); }
-.price-presets .chip { min-height: 32px; padding: 0 var(--space-3); font-size: var(--fs-xs); }
+.price-presets .chip { min-height: 44px; padding: 0 var(--space-3); font-size: var(--fs-xs); }
 
 .filters-foot { display: grid; gap: var(--space-2); margin-top: auto; }
 
@@ -764,8 +780,8 @@ img.fade.is-loaded { opacity: 1; }
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: 50%;
   background: var(--surface);
@@ -784,13 +800,21 @@ img.fade.is-loaded { opacity: 1; }
 .card-category { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; }
 .card-title { font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 600; line-height: 1.35; }
 .card-title a {
+  position: relative;
+  display: block;
   text-decoration: none;
+}
+/* The link's own box is only as tall as its (possibly single-line) text, well
+   under a 44px tap target; this pads the actual clickable area without
+   disturbing the visible, line-clamped text below. */
+.card-title a::before { content: ""; position: absolute; inset: -13px 0; }
+.card-title a:hover { text-decoration: underline; }
+.card-title-text {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.card-title a:hover { text-decoration: underline; }
 .card-body .price-now { font-size: var(--fs-md); }
 .card-cta { margin-top: auto; width: 100%; }
 .card-body .rating { font-size: var(--fs-xs); }
@@ -852,8 +876,8 @@ img.fade.is-loaded { opacity: 1; }
   transform: translateY(-50%);
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: 50%;
   background: var(--surface);
@@ -891,6 +915,9 @@ img.fade.is-loaded { opacity: 1; }
   cursor: pointer;
   transition: background var(--dur) var(--ease);
 }
+/* Keeps the small, unobtrusive 28px circle but pads the actual tap target to 44px,
+   so it's still easy to hit without growing visually into the photo. */
+.gallery-credit-toggle::before { content: ""; position: absolute; inset: -8px; }
 .gallery-credit-toggle:hover,
 .gallery-credit-toggle[aria-expanded="true"] { background: rgb(0 0 0 / 0.65); }
 .gallery-credit-panel {
@@ -944,7 +971,7 @@ img.fade.is-loaded { opacity: 1; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 var(--space-4);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
@@ -1013,6 +1040,7 @@ img.fade.is-loaded { opacity: 1; }
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
+  padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
   border-bottom: 1px solid var(--border);
 }
 .drawer-head h2 { font-size: var(--fs-lg); }
@@ -1022,6 +1050,7 @@ img.fade.is-loaded { opacity: 1; }
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border);
   background: var(--surface);
 }
@@ -1029,7 +1058,7 @@ img.fade.is-loaded { opacity: 1; }
 .cart-items { margin: 0; padding: 0; list-style: none; }
 .cart-line {
   display: grid;
-  grid-template-columns: 72px 1fr auto;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
   gap: var(--space-3);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--border);
@@ -1038,7 +1067,17 @@ img.fade.is-loaded { opacity: 1; }
 .cart-line-media { width: 72px; height: 72px; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); }
 .cart-line-media img { width: 100%; height: 100%; object-fit: cover; }
 .cart-line-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.cart-line-name { font-weight: 600; text-decoration: none; font-size: var(--fs-sm); }
+.cart-line-name {
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+/* Same reasoning as .card-title a::before: the text itself is well under a
+   44px tap target, so pad the clickable area invisibly instead. */
+.cart-line-name::before { content: ""; position: absolute; inset: -12px 0; }
 .cart-line-name:hover { text-decoration: underline; }
 .cart-line-options, .cart-line-unit { font-size: var(--fs-xs); color: var(--muted); }
 .cart-line-actions { display: flex; align-items: center; gap: var(--space-2); margin-top: 6px; }
@@ -1111,7 +1150,10 @@ img.fade.is-loaded { opacity: 1; }
 .summary-items { margin: 0 0 var(--space-3); padding: 0; list-style: none; max-height: 320px; overflow-y: auto; }
 .summary-item {
   display: grid;
-  grid-template-columns: 52px 1fr auto;
+  /* minmax(0, 1fr): without it, a long product name can force this column
+     (and the whole order summary) wider than its container instead of
+     wrapping or clamping. */
+  grid-template-columns: 52px minmax(0, 1fr) auto;
   gap: var(--space-3);
   align-items: center;
   padding: var(--space-2) 0;
@@ -1133,7 +1175,7 @@ img.fade.is-loaded { opacity: 1; }
   line-height: 20px;
   text-align: center;
 }
-.summary-name { font-size: var(--fs-sm); font-weight: 600; line-height: 1.3; }
+.summary-name { font-size: var(--fs-sm); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
 .summary-opts { font-size: var(--fs-xs); color: var(--muted); }
 .summary-price { font-size: var(--fs-sm); font-weight: 600; }
 .summary-totals { margin: 0; border-top: 1px solid var(--border); padding-top: var(--space-3); display: grid; gap: var(--space-2); }
@@ -1203,7 +1245,7 @@ img.fade.is-loaded { opacity: 1; }
 .toast-region {
   position: fixed;
   left: 50%;
-  bottom: var(--space-4);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
   z-index: 90;
   display: grid;
   gap: var(--space-2);
@@ -1239,7 +1281,7 @@ img.fade.is-loaded { opacity: 1; }
   text-decoration: underline;
   cursor: pointer;
   padding: 6px;
-  min-height: 36px;
+  min-height: 44px;
 }
 
 .site-footer { margin-top: auto; background: var(--surface); border-top: 1px solid var(--border); }
@@ -1251,6 +1293,8 @@ img.fade.is-loaded { opacity: 1; }
 }
 .footer-brand { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); margin-bottom: 4px; }
 .footer-heading { font-weight: 700; margin-bottom: 4px; }
+.footer-links { display: flex; flex-direction: column; margin: 0; }
+.footer-links a { display: flex; align-items: center; min-height: 44px; }
 @media (min-width: 700px) {
   .footer-inner { grid-template-columns: 2fr 1fr 1fr; }
   .footer-copy { grid-column: 1 / -1; }
@@ -1281,7 +1325,7 @@ img.fade.is-loaded { opacity: 1; }
 .auth-head h2 { font-family: var(--font-display); font-size: var(--fs-xl); margin: 0; }
 .auth-dialog form { display: grid; gap: var(--space-3); }
 .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: var(--space-4); background: var(--surface-2); border-radius: var(--radius); }
-.auth-tabs button { min-height: 40px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
+.auth-tabs button { min-height: 44px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
 .auth-tabs button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
 .btn-google { gap: var(--space-2); }
 .auth-divider { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-4) 0; color: var(--muted); font-size: var(--fs-sm); }

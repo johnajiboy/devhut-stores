@@ -79,7 +79,7 @@
 /* Toolbar */
 .admin-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
 .admin-search { flex: 1 1 240px; }
-.admin-search input { min-height: 40px; }
+.admin-search input { min-height: 44px; }
 .order-count { margin-left: auto; font-size: var(--fs-sm); }
 
 /* Product table: cards on mobile, table from 820px */
@@ -204,7 +204,7 @@
 /* Product editor dialog */
 .admin-dialog {
   width: min(760px, calc(100vw - 16px));
-  max-height: calc(100dvh - 16px);
+  max-height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   padding: 0;
   border: 0;
   border-radius: var(--radius-lg);
@@ -213,7 +213,7 @@
   box-shadow: var(--shadow-lg);
 }
 .admin-dialog::backdrop { background: var(--overlay); }
-.admin-dialog form { display: flex; flex-direction: column; max-height: calc(100dvh - 16px); }
+.admin-dialog form { display: flex; flex-direction: column; max-height: inherit; }
 .dialog-head {
   display: flex;
   align-items: center;
@@ -252,7 +252,7 @@
 code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9em; padding: 1px 5px; border-radius: 4px; background: var(--surface-2); }
 
 .check-row { display: flex; flex-wrap: wrap; gap: var(--space-4); }
-.check { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 600; font-size: var(--fs-sm); cursor: pointer; min-height: 36px; }
+.check { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 600; font-size: var(--fs-sm); cursor: pointer; min-height: 44px; }
 .check input { width: 18px; height: 18px; accent-color: var(--primary); margin: 0; }
 
 .image-list { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
@@ -269,7 +269,7 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9em; 
   font-weight: 700;
   color: var(--primary);
   cursor: pointer;
-  min-height: 32px;
+  min-height: 44px;
 }
 .image-item-actions button.remove { color: var(--danger); }
 .image-item-actions button:disabled { visibility: hidden; }
